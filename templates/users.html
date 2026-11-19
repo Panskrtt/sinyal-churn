@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_m.html" import csrf %}
+{% block title %}Pengguna{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Pengguna dan hak akses</h1></div>
+<div class="tablewrap"><table class="data">
+  <thead><tr><th>Nama</th><th>Email</th><th>Peran</th><th>Akun</th><th>Kata sandi baru</th><th></th></tr></thead>
+  <tbody>{% for u in rows %}<tr>
+    <td>{{ u.nama }}</td><td>{{ u.email }}</td>
+    <td><select name="role" form="uf{{ u.id }}" aria-label="Peran {{ u.email }}">{% for k, v in ROLES.items() %}<option value="{{ k }}" {% if u.role==k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></td>
+    <td><select name="aktif" form="uf{{ u.id }}" aria-label="Status akun {{ u.email }}"><option value="1" {% if u.aktif %}selected{% endif %}>Aktif</option><option value="0" {% if not u.aktif %}selected{% endif %}>Nonaktif</option></select></td>
+    <td><input type="password" name="password" form="uf{{ u.id }}" autocomplete="new-password" placeholder="Kosongkan bila tidak diganti" aria-label="Kata sandi baru {{ u.email }}"></td>
+    <td><form id="uf{{ u.id }}" method="post" action="{{ url_for('update_user', uid=u.id) }}">{{ csrf() }}<button class="btn kecil" type="submit">Simpan perubahan</button></form></td></tr>{% endfor %}</tbody>
+</table></div>
+<section class="sec">
+  <h2>Tambah pengguna</h2>
+  <form method="post" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:end;max-width:60rem">
+    {{ csrf() }}
+    <div><label for="n">Nama</label><input id="n" name="nama" type="text" required></div>
+    <div><label for="e">Email</label><input id="e" name="email" type="email" required></div>
+    <div><label for="p">Kata sandi (minimal 8 karakter)</label><input id="p" name="password" type="password" autocomplete="new-password" required></div>
+    <div><label for="r">Peran</label><select id="r" name="role">{% for k, v in ROLES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></div>
+    <div><button class="btn" type="submit">Tambah pengguna</button></div>
+  </form>
+</section>
+<section class="sec"><h2>Hak akses per peran</h2>
+  <div class="tablewrap"><table class="data"><thead><tr><th>Fitur</th><th>Tim retensi</th><th>Analis data</th><th>Admin sistem</th></tr></thead><tbody>
+    <tr><td>Ringkasan, daftar pelanggan, segmen, tindak lanjut, ekspor</td><td>Ya</td><td>Ya</td><td>Ya</td></tr>
+    <tr><td>Unggah data, latih ulang model, atur ambang</td><td>Tidak</td><td>Ya</td><td>Ya</td></tr>
+    <tr><td>Kelola pengguna</td><td>Tidak</td><td>Tidak</td><td>Ya</td></tr></tbody></table></div></section>
+{% endblock %}

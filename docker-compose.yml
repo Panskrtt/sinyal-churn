@@ -1,0 +1,15 @@
+services:
+  sinyal:
+    build: .
+    image: sinyal:latest
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-0}
+    volumes:
+      - sinyal-data:/data
+    restart: unless-stopped
+
+volumes:
+  sinyal-data:

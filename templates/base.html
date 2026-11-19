@@ -1,0 +1,48 @@
+{% from "_m.html" import csrf %}
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Sinyal{% endblock %} – Sinyal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if user %}
+{% set ep = request.endpoint %}
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="{{ url_for('dashboard') }}"><span class="sig"><i></i><i></i><i></i><i></i></span>Sinyal</a>
+    <nav aria-label="Menu utama">
+      <a href="{{ url_for('dashboard') }}" {% if ep == 'dashboard' %}aria-current="page"{% endif %}>Ringkasan</a>
+      <a href="{{ url_for('customers') }}" {% if ep in ('customers','customer') %}aria-current="page"{% endif %}>Pelanggan</a>
+      <a href="{{ url_for('segments') }}" {% if ep == 'segments' %}aria-current="page"{% endif %}>Segmen</a>
+      <a href="{{ url_for('fuzzy') }}" {% if ep == 'fuzzy' %}aria-current="page"{% endif %}>Logika fuzzy</a>
+      <a href="{{ url_for('followups') }}" {% if ep == 'followups' %}aria-current="page"{% endif %}>Tindak lanjut</a>
+      {% if user.role in ('analis','admin') %}
+      <a href="{{ url_for('upload') }}" {% if ep == 'upload' %}aria-current="page"{% endif %}>Unggah data</a>
+      <a href="{{ url_for('model') }}" {% if ep == 'model' %}aria-current="page"{% endif %}>Model</a>
+      {% endif %}
+      {% if user.role == 'admin' %}
+      <a href="{{ url_for('users') }}" {% if ep == 'users' %}aria-current="page"{% endif %}>Pengguna</a>
+      {% endif %}
+    </nav>
+    <div class="who">
+      <b>{{ user.nama }}</b>{{ ROLES[user.role] }}
+      <form method="post" action="{{ url_for('logout') }}">{{ csrf() }}<button class="btn ghost kecil" type="submit">Keluar</button></form>
+    </div>
+  </aside>
+  <main class="main">
+    {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}" role="status">{{ msg }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+{% block bare %}{% endblock %}
+{% endif %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

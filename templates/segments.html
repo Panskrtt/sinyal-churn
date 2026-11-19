@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Segmen{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Segmen pelanggan</h1></div>
+<p class="muted" style="max-width:64ch">Segmen dibentuk dengan Fuzzy C-Means dari lama berlangganan, tagihan, jumlah layanan tambahan, kontrak, layanan internet, metode pembayaran, dan data demografi, tanpa memakai label churn. Setiap pelanggan punya derajat keanggotaan di semua segmen; segmen dominan adalah yang derajatnya terbesar. Churn historis dihitung sesudahnya untuk menguji apakah segmen itu bermakna. Penjelasan metode ada di halaman <a href="{{ url_for('fuzzy') }}">Logika fuzzy</a>.</p>
+{% if not segs %}<div class="empty"><h2>Segmen belum terbentuk</h2><p>Latih model terlebih dahulu agar segmen muncul.</p></div>{% endif %}
+{% for s in segs %}
+<section class="seg-block">
+  <div class="row" style="justify-content:space-between"><h2>{{ s.nama }}</h2><a class="btn ghost kecil" href="{{ url_for('customers', segmen=s.id) }}">Lihat pelanggan berisiko</a></div>
+  <dl class="stats" style="margin-top:1rem">
+    <div><dt>Anggota</dt><dd>{{ s.ukuran|idn }}</dd></div><div><dt>Churn historis</dt><dd>{{ s.churn_rate|pct(1) }}</dd></div>
+    <div><dt>Aktif dan berisiko</dt><dd>{{ s.berisiko|idn }}</dd></div><div><dt>Rata-rata lama berlangganan</dt><dd>{{ s.tenure|idn }} bln</dd></div>
+    <div><dt>Rata-rata tagihan</dt><dd>USD {{ s.tagihan|idn }}</dd></div>
+  </dl>
+  <p style="margin-top:1rem;max-width:70ch">{{ s.ringkasan }}</p>
+  <h3>Saran aksi untuk segmen ini</h3>
+  <ul class="rec">{% for x in s.rec %}<li>{{ x }}</li>{% endfor %}</ul>
+</section>
+{% endfor %}
+{% endblock %}

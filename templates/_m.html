@@ -1,0 +1,11 @@
+{% macro sig(p, besar=False) -%}
+{% set l = level(p) -%}
+<span class="sig l{{ l }}{% if besar %} besar{% endif %}" role="img" aria-label="{{ ['Belum diskor','Risiko rendah','Risiko sedang','Risiko tinggi','Risiko sangat tinggi'][l] }}"><i></i><i></i><i></i><i></i></span>
+{%- endmacro %}
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+{% macro status(r, thr) -%}
+{% if r.churn_aktual == 'Yes' %}<span class="pill">Sudah berhenti</span>
+{% elif r.prob is none %}<span class="pill">Belum diskor</span>
+{% elif r.prob >= thr %}<span class="pill risk">Berisiko</span>
+{% else %}<span class="pill ok">Aman</span>{% endif %}
+{%- endmacro %}

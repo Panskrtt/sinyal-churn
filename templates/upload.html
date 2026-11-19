@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_m.html" import csrf %}
+{% block title %}Unggah data{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Unggah data pelanggan</h1></div>
+<div class="split">
+  <section>
+    <form method="post" enctype="multipart/form-data" data-busy="Mengunggah dan menghitung skor..." style="display:grid;gap:1rem;max-width:30rem">
+      {{ csrf() }}
+      <div><label for="berkas">Berkas CSV</label><input id="berkas" name="berkas" type="file" accept=".csv,text/csv" required></div>
+      <div><button class="btn" type="submit">Unggah dan beri skor</button></div>
+    </form>
+    <p class="muted small" style="margin-top:1rem;max-width:56ch">Pelanggan dengan ID yang sudah ada akan diperbarui, sisanya ditambahkan. Kolom <b>Churn</b> boleh kosong atau tidak ada untuk pelanggan yang masih aktif. Bila kamu menambah data berlabel baru, latih ulang model di halaman Model. Ukuran maksimum 10 MB.</p>
+  </section>
+  <section>
+    <h2>Isi database saat ini</h2>
+    <dl class="kv"><dt>Total pelanggan</dt><dd>{{ total|idn }}</dd><dt>Dengan label churn</dt><dd>{{ lab|idn }}</dd></dl>
+    <h3 style="margin-top:1.5rem">Kolom wajib</h3>
+    <p class="small muted">{{ kolom|join(', ') }}. Kolom opsional: Churn.</p>
+  </section>
+</div>
+{% endblock %}
