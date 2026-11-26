@@ -3,49 +3,144 @@
 {% block title %}Pelanggan{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Pelanggan</h1>
+  <div>
+    <h1>Pelanggan</h1>
+    <p class="muted small" style="margin:.25rem 0 0">Pantau tingkat risiko churn, segmen, dan riwayat tagihan pelanggan.</p>
+  </div>
   <div class="row">
-    <a class="btn ghost kecil" href="{{ url_for('export', format='csv', **args) }}">Ekspor CSV</a>
-    <a class="btn ghost kecil" href="{{ url_for('export', format='xlsx', **args) }}">Ekspor Excel</a>
+    <a class="btn ghost kecil" href="{{ url_for('export', format='csv', **args) }}">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Ekspor CSV
+    </a>
+    <a class="btn ghost kecil" href="{{ url_for('export', format='xlsx', **args) }}">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Ekspor Excel
+    </a>
   </div>
 </div>
+
 <form class="filters" method="get">
-  <div><label for="q">Cari ID</label><input id="q" name="q" type="text" value="{{ f.get('q','') }}" placeholder="mis. 7590"></div>
-  <div><label for="tampil">Tampilkan</label><select id="tampil" name="tampil">
-    <option value="risiko" {% if f.get('tampil','risiko')=='risiko' %}selected{% endif %}>Di atas ambang ({{ (thr*100)|round|int }}%)</option>
-    <option value="semua" {% if f.get('tampil')=='semua' %}selected{% endif %}>Semua pelanggan</option></select></div>
-  <div><label for="status">Status langganan</label><select id="status" name="status">
-    <option value="aktif" {% if f.get('status','aktif')=='aktif' %}selected{% endif %}>Masih aktif</option>
-    <option value="berhenti" {% if f.get('status')=='berhenti' %}selected{% endif %}>Sudah berhenti</option>
-    <option value="semua" {% if f.get('status')=='semua' %}selected{% endif %}>Semua</option></select></div>
-  <div><label for="kontrak">Kontrak</label><select id="kontrak" name="kontrak"><option value="">Semua</option>
-    {% for c in contracts %}<option value="{{ c }}" {% if f.get('kontrak')==c %}selected{% endif %}>{{ c|vid }}</option>{% endfor %}</select></div>
-  <div><label for="internet">Layanan internet</label><select id="internet" name="internet"><option value="">Semua</option>
-    {% for c in internet %}<option value="{{ c }}" {% if f.get('internet')==c %}selected{% endif %}>{{ 'tanpa internet' if c=='No' else c|vid }}</option>{% endfor %}</select></div>
-  <div><label for="bayar">Metode pembayaran</label><select id="bayar" name="bayar"><option value="">Semua</option>
-    {% for c in payments %}<option value="{{ c }}" {% if f.get('bayar')==c %}selected{% endif %}>{{ c|vid }}</option>{% endfor %}</select></div>
-  <div><label for="segmen">Segmen</label><select id="segmen" name="segmen"><option value="">Semua</option>
-    {% for s in segs %}<option value="{{ s.id }}" {% if f.get('segmen')==s.id|string %}selected{% endif %}>{{ s.nama }}</option>{% endfor %}</select></div>
-  <div><label for="urut">Urutkan</label><select id="urut" name="urut">
-    <option value="prob" {% if f.get('urut','prob')=='prob' %}selected{% endif %}>Risiko tertinggi</option>
-    <option value="tenure" {% if f.get('urut')=='tenure' %}selected{% endif %}>Pelanggan terbaru</option>
-    <option value="tagihan" {% if f.get('urut')=='tagihan' %}selected{% endif %}>Tagihan tertinggi</option></select></div>
-  <div class="row"><button class="btn" type="submit">Terapkan filter</button><a class="btn ghost" href="{{ url_for('customers') }}">Atur ulang</a></div>
+  <div>
+    <label for="q">Cari ID</label>
+    <div style="position:relative">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="q" name="q" type="text" value="{{ f.get('q','') }}" placeholder="mis. 7590" style="padding-left:2.2rem">
+    </div>
+  </div>
+  <div>
+    <label for="tampil">Tampilkan</label>
+    <select id="tampil" name="tampil">
+      <option value="risiko" {% if f.get('tampil','risiko')=='risiko' %}selected{% endif %}>Di atas ambang ({{ (thr*100)|round|int }}%)</option>
+      <option value="semua" {% if f.get('tampil')=='semua' %}selected{% endif %}>Semua pelanggan</option>
+    </select>
+  </div>
+  <div>
+    <label for="status">Status langganan</label>
+    <select id="status" name="status">
+      <option value="aktif" {% if f.get('status','aktif')=='aktif' %}selected{% endif %}>Masih aktif</option>
+      <option value="berhenti" {% if f.get('status')=='berhenti' %}selected{% endif %}>Sudah berhenti</option>
+      <option value="semua" {% if f.get('status')=='semua' %}selected{% endif %}>Semua</option>
+    </select>
+  </div>
+  <div>
+    <label for="urut">Urutkan</label>
+    <select id="urut" name="urut">
+      <option value="prob" {% if f.get('urut','prob')=='prob' %}selected{% endif %}>Risiko tertinggi</option>
+      <option value="tenure" {% if f.get('urut')=='tenure' %}selected{% endif %}>Pelanggan terbaru</option>
+      <option value="tagihan" {% if f.get('urut')=='tagihan' %}selected{% endif %}>Tagihan tertinggi</option>
+    </select>
+  </div>
+  <div class="row">
+    <button class="btn" type="submit">Terapkan filter</button>
+    <a class="btn ghost" href="{{ url_for('customers') }}">Atur ulang</a>
+  </div>
+
+  <details class="filter-extra" {% if f.get('kontrak') or f.get('internet') or f.get('bayar') or f.get('segmen') %}open{% endif %}>
+    <summary>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      Filter lanjutan: kontrak, layanan internet, pembayaran, dan segmen
+    </summary>
+    <div class="filter-extra-grid">
+      <div>
+        <label for="kontrak">Kontrak</label>
+        <select id="kontrak" name="kontrak">
+          <option value="">Semua</option>
+          {% for c in contracts %}<option value="{{ c }}" {% if f.get('kontrak')==c %}selected{% endif %}>{{ c|vid }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="internet">Layanan internet</label>
+        <select id="internet" name="internet">
+          <option value="">Semua</option>
+          {% for c in internet %}<option value="{{ c }}" {% if f.get('internet')==c %}selected{% endif %}>{{ 'tanpa internet' if c=='No' else c|vid }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="bayar">Metode pembayaran</label>
+        <select id="bayar" name="bayar">
+          <option value="">Semua</option>
+          {% for c in payments %}<option value="{{ c }}" {% if f.get('bayar')==c %}selected{% endif %}>{{ c|vid }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="segmen">Segmen</label>
+        <select id="segmen" name="segmen">
+          <option value="">Semua</option>
+          {% for s in segs %}<option value="{{ s.id }}" {% if f.get('segmen')==s.id|string %}selected{% endif %}>{{ s.nama }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </details>
 </form>
-<p class="muted"><b>{{ n|idn }}</b> pelanggan cocok dengan filter.</p>
+
+<p class="muted" style="margin-bottom:1rem"><b style="color:#fff">{{ n|idn }}</b> pelanggan cocok dengan filter.</p>
+
 {% if rows %}
-<div class="tablewrap"><table class="data">
-  <thead><tr><th>ID pelanggan</th><th>Risiko churn</th><th>Status</th><th>Segmen</th><th>Kontrak</th><th>Internet</th><th class="num">Lama (bulan)</th><th class="num">Tagihan (USD)</th></tr></thead>
-  <tbody>{% for r in rows %}<tr>
-    <td><a href="{{ url_for('customer', cid=r.customer_id) }}">{{ r.customer_id }}</a></td>
-    <td>{{ sig(r.prob) }} <b>{{ r.prob|pct }}</b></td><td>{{ status(r, thr) }}</td>
-    <td>{{ seg_names.get(r.segmen, '–') }}</td><td>{{ r.contract|vid }}</td><td>{{ 'tanpa internet' if r.internet_service=='No' else r.internet_service|vid }}</td>
-    <td class="num">{{ r.tenure|idn }}</td><td class="num">{{ r.monthly_charges|idn(2) }}</td></tr>{% endfor %}</tbody>
-</table></div>
-<div class="pager"><span class="muted">Halaman {{ page }} dari {{ pages }}</span>
-  <span class="row">{% if page > 1 %}<a class="btn ghost kecil" href="{{ url_for('customers', hal=page-1, **args) }}">Sebelumnya</a>{% endif %}
-  {% if page < pages %}<a class="btn ghost kecil" href="{{ url_for('customers', hal=page+1, **args) }}">Berikutnya</a>{% endif %}</span></div>
+<div class="tablewrap">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>ID pelanggan</th>
+        <th>Risiko churn</th>
+        <th>Status</th>
+        <th>Segmen</th>
+        <th>Kontrak</th>
+        <th>Internet</th>
+        <th class="num">Lama (bulan)</th>
+        <th class="num">Tagihan (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td><a href="{{ url_for('customer', cid=r.customer_id) }}" style="font-weight:600">{{ r.customer_id }}</a></td>
+        <td>{{ sig(r.prob) }} <b style="color:#fff;margin-left:.3rem">{{ r.prob|pct }}</b></td>
+        <td>{{ status(r, thr) }}</td>
+        <td>{{ seg_names.get(r.segmen, '–') }}</td>
+        <td>{{ r.contract|vid }}</td>
+        <td>{{ 'tanpa internet' if r.internet_service=='No' else r.internet_service|vid }}</td>
+        <td class="num">{{ r.tenure|idn }}</td>
+        <td class="num" style="font-weight:600;color:#F8FAFC">{{ r.monthly_charges|idn(2) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="pager">
+  <span class="muted small">Halaman <b style="color:#fff">{{ page }}</b> dari <b style="color:#fff">{{ pages }}</b></span>
+  <span class="row">
+    {% if page > 1 %}<a class="btn ghost kecil" href="{{ url_for('customers', hal=page-1, **args) }}">Sebelumnya</a>{% endif %}
+    {% if page < pages %}<a class="btn ghost kecil" href="{{ url_for('customers', hal=page+1, **args) }}">Berikutnya</a>{% endif %}
+  </span>
+</div>
 {% else %}
-<div class="empty"><h2>Tidak ada pelanggan yang cocok</h2><p>Longgarkan filter, atau ubah tampilan ke “Semua pelanggan”.</p></div>
+<div class="empty">
+  <div style="width:42px;height:42px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(168,85,247,.18));border:1px solid rgba(34,211,238,.35);box-shadow:0 0 18px rgba(34,211,238,.2);color:#67E8F9">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
+  <h2>Tidak ada pelanggan yang cocok</h2>
+  <p class="muted" style="margin-bottom:0">Longgarkan filter, atau ubah tampilan ke “Semua pelanggan”.</p>
+</div>
 {% endif %}
 {% endblock %}

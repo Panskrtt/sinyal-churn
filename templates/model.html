@@ -2,26 +2,50 @@
 {% from "_m.html" import csrf %}
 {% block title %}Model{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Model dan evaluasi</h1></div>
+<div class="page-head">
+  <div>
+    <h1>Model dan evaluasi</h1>
+    <p class="muted small" style="margin:.3rem 0 0">Pelatihan ulang model klasifikasi, pengaturan ambang risiko, dan perbandingan metrik evaluasi.</p>
+  </div>
+</div>
+
 <div class="split">
-  <section>
+  <section class="seg-block" style="margin-bottom:0">
+    <div class="row" style="margin-bottom:.85rem">
+      <span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(34,211,238,.2),rgba(168,85,247,.2));border:1px solid rgba(34,211,238,.38);box-shadow:0 0 16px rgba(34,211,238,.2);color:#67E8F9">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+      </span>
+      <h2>Status pelatihan model</h2>
+    </div>
     {% if m %}
-    <p>Model aktif: <b>{{ m.selected }}</b>, dilatih {{ run.waktu|tgl }} dengan {{ m.n|idn }} pelanggan berlabel (churn {{ m.churn_rate|pct(1) }}). Segmen: <b>{{ m.k_selected }}</b>.</p>
-    {% else %}<p>Model belum pernah dilatih.</p>{% endif %}
-    <form method="post" action="{{ url_for('retrain') }}" data-busy="Melatih model, harap tunggu sekitar 1 menit...">
-      {{ csrf() }}<button class="btn" type="submit">Latih ulang model</button>
+    <p style="color:#E2E8F0">Model aktif: <b style="color:#67E8F9">{{ m.selected }}</b>, dilatih {{ run.waktu|tgl }} dengan <b style="color:#fff">{{ m.n|idn }}</b> pelanggan berlabel (churn {{ m.churn_rate|pct(1) }}). Segmen: <b style="color:#fff">{{ m.k_selected }}</b>.</p>
+    {% else %}<p class="muted">Model belum pernah dilatih.</p>{% endif %}
+    <form method="post" action="{{ url_for('retrain') }}" data-busy="Melatih model, harap tunggu sekitar 1 menit..." style="margin-top:.85rem">
+      {{ csrf() }}
+      <button class="btn" type="submit">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Latih ulang model
+      </button>
     </form>
-    <p class="muted small" style="margin-top:.6rem;max-width:56ch">Pelatihan memakai semua pelanggan berlabel di database: membandingkan lima model plus Fuzzy Sugeno dengan validasi silang 5 lipatan, memilih yang AUC-nya tertinggi, lalu membentuk ulang segmen Fuzzy C-Means dan aturan Sugeno.</p>
+    <p class="muted small" style="margin-top:.85rem;margin-bottom:0;max-width:56ch">Pelatihan memakai semua pelanggan berlabel di database: membandingkan lima model plus Fuzzy Sugeno dengan validasi silang 5 lipatan, memilih yang AUC-nya tertinggi, lalu membentuk ulang segmen Fuzzy C-Means dan aturan Sugeno.</p>
   </section>
-  <section>
-    <h2>Ambang probabilitas</h2>
+
+  <section class="seg-block" style="margin-bottom:0">
+    <div class="row" style="margin-bottom:.85rem">
+      <span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(168,85,247,.22),rgba(34,211,238,.18));border:1px solid rgba(168,85,247,.38);box-shadow:0 0 16px rgba(168,85,247,.22);color:#D8B4FE">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      </span>
+      <h2>Ambang probabilitas</h2>
+    </div>
     <form method="post" action="{{ url_for('set_threshold') }}" class="row" style="align-items:flex-end">
       {{ csrf() }}
-      <div><label for="amb">Pelanggan dianggap berisiko bila probabilitas ≥</label>
-        <input id="amb" name="ambang" type="text" inputmode="decimal" value="{{ '%.2f'|format(thr)|replace('.', ',') }}" style="max-width:8rem"></div>
+      <div>
+        <label for="amb">Pelanggan dianggap berisiko bila probabilitas ≥</label>
+        <input id="amb" name="ambang" type="text" inputmode="decimal" value="{{ '%.2f'|format(thr)|replace('.', ',') }}" style="max-width:9rem">
+      </div>
       <button class="btn" type="submit">Simpan ambang</button>
     </form>
-    <p class="muted small" style="margin-top:.5rem">Isi angka 0 sampai 1. Ambang rendah menjaring lebih banyak pelanggan tetapi presisinya turun.</p>
+    <p class="muted small" style="margin-top:.85rem;margin-bottom:0">Isi angka 0 sampai 1. Ambang rendah menjaring lebih banyak pelanggan tetapi presisinya turun.</p>
   </section>
 </div>
 
@@ -29,48 +53,153 @@
 <section class="sec">
   <h2>Perbandingan model klasifikasi</h2>
   <p class="muted small">Rata-rata 5 lipatan pada ambang 0,5. Baris “Fuzzy Sugeno (aturan)” adalah komponen skor gabungan, bukan model mandiri. Baris dengan “bobot kelas” hanya dipakai sebagai eksperimen: bobot kelas menaikkan recall tetapi memelintir probabilitas, sehingga tidak dipilih untuk sistem.</p>
-  <div class="tablewrap"><table class="data">
-    <thead><tr><th>Model</th><th class="num">AUC</th><th class="num">Simpangan baku AUC</th><th class="num">Presisi</th><th class="num">Recall</th><th class="num">F1</th><th class="num">Akurasi</th><th></th></tr></thead>
-    <tbody>{% for r in m.clf %}<tr><td>{{ r.name }}</td><td class="num {% if r.name==m.selected %}best{% endif %}">{{ r.auc|idn(3) }}</td><td class="num">{{ r.auc_std|idn(3) }}</td>
-      <td class="num">{{ r.precision|idn(3) }}</td><td class="num">{{ r.recall|idn(3) }}</td><td class="num">{{ r.f1|idn(3) }}</td><td class="num">{{ r.accuracy|idn(3) }}</td>
-      <td>{% if r.name==m.selected %}<span class="pill pakai">Dipakai</span>{% endif %}</td></tr>{% endfor %}</tbody>
-  </table></div>
+  <div class="tablewrap">
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th class="num">AUC</th>
+          <th class="num">Simpangan baku AUC</th>
+          <th class="num">Presisi</th>
+          <th class="num">Recall</th>
+          <th class="num">F1</th>
+          <th class="num">Akurasi</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in m.clf %}
+        <tr>
+          <td style="{% if r.name==m.selected %}font-weight:600;color:#fff{% endif %}">{{ r.name }}</td>
+          <td class="num {% if r.name==m.selected %}best{% endif %}">{{ r.auc|idn(3) }}</td>
+          <td class="num">{{ r.auc_std|idn(3) }}</td>
+          <td class="num">{{ r.precision|idn(3) }}</td>
+          <td class="num">{{ r.recall|idn(3) }}</td>
+          <td class="num">{{ r.f1|idn(3) }}</td>
+          <td class="num">{{ r.accuracy|idn(3) }}</td>
+          <td>{% if r.name==m.selected %}<span class="pill pakai">Dipakai</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section class="sec">
   <h2>Pengaruh ambang pada model terpilih</h2>
   <p class="muted small">Dihitung dari prediksi out-of-fold seluruh data berlabel.</p>
-  <div class="tablewrap"><table class="data">
-    <thead><tr><th class="num">Ambang</th><th class="num">Presisi</th><th class="num">Recall</th><th class="num">F1</th><th class="num">Pelanggan ditandai</th></tr></thead>
-    <tbody>{% for t in m.thresholds %}<tr><td class="num">{{ t.t|idn(1) }}</td><td class="num">{{ t.precision|idn(3) }}</td><td class="num">{{ t.recall|idn(3) }}</td><td class="num">{{ t.f1|idn(3) }}</td><td class="num">{{ t.flagged|idn }}</td></tr>{% endfor %}</tbody>
-  </table></div>
+  <div class="tablewrap">
+    <table class="data">
+      <thead>
+        <tr>
+          <th class="num">Ambang</th>
+          <th class="num">Presisi</th>
+          <th class="num">Recall</th>
+          <th class="num">F1</th>
+          <th class="num">Pelanggan ditandai</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in m.thresholds %}
+        <tr>
+          <td class="num" style="font-weight:600;color:#fff">{{ t.t|idn(1) }}</td>
+          <td class="num">{{ t.precision|idn(3) }}</td>
+          <td class="num">{{ t.recall|idn(3) }}</td>
+          <td class="num">{{ t.f1|idn(3) }}</td>
+          <td class="num">{{ t.flagged|idn }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
   {% if cm %}
-  <h3 style="margin-top:1.5rem">Matriks konfusi pada ambang {{ '%.2f'|format(thr)|replace('.', ',') }}</h3>
-  <div class="tablewrap" style="max-width:34rem"><table class="data">
-    <thead><tr><th></th><th class="num">Diprediksi berhenti</th><th class="num">Diprediksi bertahan</th></tr></thead>
-    <tbody><tr><td><b>Sebenarnya berhenti</b></td><td class="num">{{ cm.tp|idn }} (terdeteksi)</td><td class="num">{{ cm.fn|idn }} (terlewat)</td></tr>
-    <tr><td><b>Sebenarnya bertahan</b></td><td class="num">{{ cm.fp|idn }} (salah tandai)</td><td class="num">{{ cm.tn|idn }}</td></tr></tbody>
-  </table></div>
+  <h3 style="margin-top:1.75rem;margin-bottom:.65rem;color:#67E8F9">Matriks konfusi pada ambang {{ '%.2f'|format(thr)|replace('.', ',') }}</h3>
+  <div class="tablewrap" style="max-width:36rem">
+    <table class="data">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="num">Diprediksi berhenti</th>
+          <th class="num">Diprediksi bertahan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b style="color:#fff">Sebenarnya berhenti</b></td>
+          <td class="num" style="color:#6EE7B7;font-weight:600">{{ cm.tp|idn }} <span class="muted small">(terdeteksi)</span></td>
+          <td class="num" style="color:#FDA4AF">{{ cm.fn|idn }} <span class="muted small">(terlewat)</span></td>
+        </tr>
+        <tr>
+          <td><b style="color:#fff">Sebenarnya bertahan</b></td>
+          <td class="num" style="color:#FBBF24">{{ cm.fp|idn }} <span class="muted small">(salah tandai)</span></td>
+          <td class="num" style="color:#E2E8F0;font-weight:600">{{ cm.tn|idn }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   {% endif %}
 </section>
 
 <section class="sec">
   <h2>Gabungan model dan Fuzzy Sugeno</h2>
-  <p class="muted small" style="max-width:70ch">Skor risiko sistem = (1 − a) × probabilitas model + a × indeks Sugeno. Nilai a dipilih dari AUC out-of-fold. Di sini a = <b>{{ (m.sugeno.alpha*100)|round|int }}%</b>. Indeks Sugeno sendirian mencapai AUC {{ m.sugeno.auc|idn(3) }}. Peningkatan akibat penggabungan kecil, nilai utama Sugeno adalah penjelasan aturannya.</p>
-  <div class="tablewrap" style="max-width:34rem"><table class="data">
-    <thead><tr><th class="num">Bobot Sugeno (a)</th><th class="num">AUC gabungan</th></tr></thead>
-    <tbody>{% for b in m.sugeno.blend %}<tr><td class="num {% if b.alpha==m.sugeno.alpha %}best{% endif %}">{{ (b.alpha*100)|round|int }}%</td><td class="num">{{ b.auc|idn(4) }}</td></tr>{% endfor %}</tbody>
-  </table></div>
+  <p class="muted small" style="max-width:70ch">Skor risiko sistem = (1 − a) × probabilitas model + a × indeks Sugeno. Nilai a dipilih dari AUC out-of-fold. Di sini a = <b style="color:#67E8F9">{{ (m.sugeno.alpha*100)|round|int }}%</b>. Indeks Sugeno sendirian mencapai AUC {{ m.sugeno.auc|idn(3) }}. Peningkatan akibat penggabungan kecil, nilai utama Sugeno adalah penjelasan aturannya.</p>
+  <div class="tablewrap" style="max-width:34rem">
+    <table class="data">
+      <thead>
+        <tr>
+          <th class="num">Bobot Sugeno (a)</th>
+          <th class="num">AUC gabungan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in m.sugeno.blend %}
+        <tr>
+          <td class="num {% if b.alpha==m.sugeno.alpha %}best{% endif %}">{{ (b.alpha*100)|round|int }}%</td>
+          <td class="num {% if b.alpha==m.sugeno.alpha %}best{% endif %}">{{ b.auc|idn(4) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section class="sec">
   <h2>Perbandingan klasterisasi</h2>
   <p class="muted small" style="max-width:72ch">Silhouette dihitung dengan jarak Gower pada sampel acak 1.500 pelanggan (FCM memakai keanggotaan terbesar sebagai kluster). Cramér’s V mengukur kekuatan hubungan kluster dengan churn (0 sampai 1). PC (koefisien partisi, makin besar makin tegas) dan XB (Xie-Beni, makin kecil makin baik) khusus untuk Fuzzy C-Means. Jumlah segmen dipilih dari k = {{ m.k_range[0] }} sampai {{ m.k_range[1] }} dengan XB terkecil. Silhouette di bawah 0,25 berarti kluster tidak terpisah tegas, jadi nilai segmen terletak pada hubungannya dengan churn.</p>
-  <div class="tablewrap"><table class="data">
-    <thead><tr><th class="num">k</th><th class="num">Silhouette K-Prototypes</th><th class="num">Silhouette K-Means</th><th class="num">Silhouette FCM</th><th class="num">V K-Prototypes</th><th class="num">V K-Means</th><th class="num">V FCM</th><th class="num">PC FCM</th><th class="num">XB FCM</th></tr></thead>
-    <tbody>{% for r in m.clu %}<tr><td class="num {% if r.k==m.k_selected %}best{% endif %}">{{ r.k }}</td><td class="num">{{ r.kproto_sil|idn(3) }}</td><td class="num">{{ r.kmeans_sil|idn(3) }}</td><td class="num">{{ r.fcm_sil|idn(3) }}</td><td class="num">{{ r.kproto_v|idn(3) }}</td><td class="num">{{ r.kmeans_v|idn(3) }}</td><td class="num">{{ r.fcm_v|idn(3) }}</td><td class="num">{{ r.fcm_pc|idn(3) }}</td><td class="num">{{ r.fcm_xb|idn(3) }}</td></tr>{% endfor %}</tbody>
-  </table></div>
-  <p class="small muted" style="margin-top:.6rem">Segmen yang dipakai ({{ m.segment_method }}, k = {{ m.k_selected }}): Cramér’s V {{ m.segment_v|idn(3) }}, uji chi-square {{ 'p < 0,001' if m.segment_p < 0.001 else 'p = ' ~ (m.segment_p|idn(3)) }}.</p>
+  <div class="tablewrap">
+    <table class="data">
+      <thead>
+        <tr>
+          <th class="num">k</th>
+          <th class="num">Silhouette K-Prototypes</th>
+          <th class="num">Silhouette K-Means</th>
+          <th class="num">Silhouette FCM</th>
+          <th class="num">V K-Prototypes</th>
+          <th class="num">V K-Means</th>
+          <th class="num">V FCM</th>
+          <th class="num">PC FCM</th>
+          <th class="num">XB FCM</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in m.clu %}
+        <tr>
+          <td class="num {% if r.k==m.k_selected %}best{% endif %}">{{ r.k }}</td>
+          <td class="num">{{ r.kproto_sil|idn(3) }}</td>
+          <td class="num">{{ r.kmeans_sil|idn(3) }}</td>
+          <td class="num">{{ r.fcm_sil|idn(3) }}</td>
+          <td class="num">{{ r.kproto_v|idn(3) }}</td>
+          <td class="num">{{ r.kmeans_v|idn(3) }}</td>
+          <td class="num">{{ r.fcm_v|idn(3) }}</td>
+          <td class="num">{{ r.fcm_pc|idn(3) }}</td>
+          <td class="num">{{ r.fcm_xb|idn(3) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="small muted" style="margin-top:.75rem">Segmen yang dipakai ({{ m.segment_method }}, k = {{ m.k_selected }}): Cramér’s V {{ m.segment_v|idn(3) }}, uji chi-square {{ 'p < 0,001' if m.segment_p < 0.001 else 'p = ' ~ (m.segment_p|idn(3)) }}.</p>
 </section>
 {% endif %}
 {% endblock %}

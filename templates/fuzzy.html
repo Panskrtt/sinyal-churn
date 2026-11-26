@@ -1,42 +1,114 @@
 {% extends "base.html" %}
 {% block title %}Logika fuzzy{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Logika fuzzy di Sinyal</h1></div>
+<div class="page-head">
+  <div>
+    <h1>Logika fuzzy di Sinyal</h1>
+    <p class="muted small" style="margin:.3rem 0 0">Penjelasan segmentasi Fuzzy C-Means dan perhitungan indeks risiko Fuzzy Sugeno orde nol.</p>
+  </div>
+</div>
+
 {% if not m %}
-<div class="empty"><h2>Model belum dilatih</h2><p>Latih model agar parameter fuzzy muncul di sini.</p></div>
+<div class="empty">
+  <div style="width:42px;height:42px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(168,85,247,.18));border:1px solid rgba(34,211,238,.35);box-shadow:0 0 18px rgba(34,211,238,.2);color:#67E8F9">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+  </div>
+  <h2>Model belum dilatih</h2>
+  <p class="muted" style="margin-bottom:0">Latih model agar parameter fuzzy muncul di sini.</p>
+</div>
 {% else %}
-<section>
-  <h2>1. Fuzzy C-Means untuk segmentasi</h2>
-  <p style="max-width:72ch">Pada klasterisasi biasa, pelanggan masuk ke tepat satu segmen. Fuzzy C-Means memberi setiap pelanggan <b>derajat keanggotaan</b> di semua segmen, dengan jumlah 100%. Pelanggan dengan keanggotaan 45% / 40% / 15% memang berada di perbatasan, dan Sinyal menampilkannya apa adanya di profil pelanggan.</p>
-  <p><code>J = Σᵢ Σₖ uᵢₖ<sup>m</sup> ‖xᵢ − cₖ‖²</code> &nbsp; dengan &nbsp; <code>uᵢₖ = 1 / Σⱼ (dᵢₖ / dᵢⱼ)<sup>2/(m−1)</sup></code></p>
+<section class="seg-block">
+  <div class="row" style="margin-bottom:.75rem">
+    <span style="width:32px;height:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(168,85,247,.18));border:1px solid rgba(34,211,238,.35);color:#67E8F9">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+    </span>
+    <h2>1. Fuzzy C-Means untuk segmentasi</h2>
+  </div>
+  <p style="max-width:72ch;color:#E2E8F0">Pada klasterisasi biasa, pelanggan masuk ke tepat satu segmen. Fuzzy C-Means memberi setiap pelanggan <b style="color:#fff">derajat keanggotaan</b> di semua segmen, dengan jumlah 100%. Pelanggan dengan keanggotaan 45% / 40% / 15% memang berada di perbatasan, dan Sinyal menampilkannya apa adanya di profil pelanggan.</p>
+  <div style="display:inline-flex;flex-wrap:wrap;gap:.75rem 1.25rem;align-items:center;padding:.65rem 1rem;margin:.35rem 0 .5rem;background:rgba(255,255,255,.04);border:1px solid var(--garis);border-radius:12px">
+    <code style="color:#67E8F9;font-size:.92rem">J = Σᵢ Σₖ uᵢₖ<sup>m</sup> ‖xᵢ − cₖ‖²</code>
+    <span class="muted small">dengan</span>
+    <code style="color:#D8B4FE;font-size:.92rem">uᵢₖ = 1 / Σⱼ (dᵢₖ / dᵢⱼ)<sup>2/(m−1)</sup></code>
+  </div>
+
   <dl class="stats">
-    <div><dt>Jumlah segmen (k)</dt><dd>{{ m.k_selected }}</dd></div>
-    <div><dt>Pangkat kekaburan (m)</dt><dd>{{ m.fcm.m|idn(1) }}</dd></div>
-    <div><dt>Koefisien partisi (PC)</dt><dd>{{ m.fcm.pc|idn(3) }}</dd></div>
-    <div><dt>Indeks Xie-Beni (XB)</dt><dd>{{ m.fcm.xb|idn(3) }}</dd></div>
+    <div>
+      <dt>Jumlah segmen (k)</dt>
+      <dd>{{ m.k_selected }}</dd>
+    </div>
+    <div>
+      <dt>Pangkat kekaburan (m)</dt>
+      <dd>{{ m.fcm.m|idn(1) }}</dd>
+    </div>
+    <div>
+      <dt>Koefisien partisi (PC)</dt>
+      <dd>{{ m.fcm.pc|idn(3) }}</dd>
+    </div>
+    <div>
+      <dt>Indeks Xie-Beni (XB)</dt>
+      <dd>{{ m.fcm.xb|idn(3) }}</dd>
+    </div>
   </dl>
-  <p class="muted small" style="margin-top:1rem;max-width:72ch">PC bernilai 1 bila semua pelanggan sepenuhnya milik satu segmen, dan 1/k bila keanggotaan merata. Nilai {{ m.fcm.pc|idn(2) }} pada k = {{ m.k_selected }} (batas bawah {{ (1/m.k_selected)|idn(2) }}) berarti segmen saling tumpang tindih cukup banyak. Perbandingan lengkap dengan K-Prototypes dan K-Means ada di halaman Model.</p>
+  <p class="muted small" style="margin-top:1.1rem;margin-bottom:0;max-width:72ch">PC bernilai 1 bila semua pelanggan sepenuhnya milik satu segmen, dan 1/k bila keanggotaan merata. Nilai {{ m.fcm.pc|idn(2) }} pada k = {{ m.k_selected }} (batas bawah {{ (1/m.k_selected)|idn(2) }}) berarti segmen saling tumpang tindih cukup banyak. Perbandingan lengkap dengan K-Prototypes dan K-Means ada di halaman Model.</p>
 </section>
 
-<section class="sec">
-  <h2>2. Fuzzy Sugeno untuk indeks risiko</h2>
-  <p style="max-width:72ch">Indeks ini dihitung dari aturan JIKA–MAKA yang bisa dibaca langsung. Premis memakai himpunan fuzzy di bawah. Konsekuen tiap aturan berupa angka risiko tetap (Sugeno orde nol) yang <b>dipelajari dari data berlabel</b>, bukan ditebak.</p>
-  <p><code>wᵣ(x) = min(μ premis aturan r)</code> &nbsp; <code>s(x) = Σᵣ wᵣ·zᵣ / Σᵣ wᵣ</code></p>
-  <div class="factors" style="margin-top:1.25rem">
-    {% for p in plots %}<div><h3>{{ p.judul }}</h3>
-      <svg viewBox="0 0 370 150" role="img" aria-label="Fungsi keanggotaan {{ p.judul }}" style="width:100%;height:auto">
-        <line x1="10" y1="120" x2="360" y2="120" stroke="#B8C6CF"/>
-        {% for l in p.lines %}<polyline points="{{ l.poly }}" fill="none" stroke="{{ l.color }}" stroke-width="2.5"/>{% endfor %}
-        {% for x, t in p.ticks %}<text x="{{ x }}" y="138" font-size="11" fill="#5B6F7E" text-anchor="middle">{{ t }}</text>{% endfor %}
-      </svg>
-      <div class="legend">{% for l in p.lines %}<span style="--c:{{ l.color }}"><b style="color:{{ l.color }}">{{ l.label }}</b></span>{% endfor %}</div></div>{% endfor %}
+<section class="seg-block">
+  <div class="row" style="margin-bottom:.75rem">
+    <span style="width:32px;height:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(34,211,238,.18));border:1px solid rgba(168,85,247,.35);color:#D8B4FE">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+    </span>
+    <h2>2. Fuzzy Sugeno untuk indeks risiko</h2>
   </div>
-  <h3 style="margin-top:1.75rem">Basis aturan dan konsekuen yang dipelajari</h3>
-  <div class="tablewrap"><table class="data">
-    <thead><tr><th>Aturan</th><th>JIKA</th><th class="num">Risiko aturan (z)</th></tr></thead>
-    <tbody>{% for r in m.sugeno.rules %}<tr><td>R{{ loop.index }}</td><td>{{ r.aturan }}</td><td class="num">{{ r.z|pct(1) }}</td></tr>{% endfor %}</tbody>
-  </table></div>
-  <p class="muted small" style="margin-top:.75rem;max-width:72ch">Indeks Sugeno sendirian mencapai AUC {{ m.sugeno.auc|idn(3) }} pada validasi silang. Skor risiko sistem menggabungkannya dengan probabilitas model dengan bobot {{ (m.sugeno.alpha*100)|round|int }}%; angka lengkapnya ada di halaman Model.</p>
+  <p style="max-width:72ch;color:#E2E8F0">Indeks ini dihitung dari aturan JIKA–MAKA yang bisa dibaca langsung. Premis memakai himpunan fuzzy di bawah. Konsekuen tiap aturan berupa angka risiko tetap (Sugeno orde nol) yang <b style="color:#fff">dipelajari dari data berlabel</b>, bukan ditebak.</p>
+  <div style="display:inline-flex;flex-wrap:wrap;gap:.75rem 1.25rem;align-items:center;padding:.65rem 1rem;margin:.35rem 0 .5rem;background:rgba(255,255,255,.04);border:1px solid var(--garis);border-radius:12px">
+    <code style="color:#67E8F9;font-size:.92rem">wᵣ(x) = min(μ premis aturan r)</code>
+    <span class="muted small">dan</span>
+    <code style="color:#D8B4FE;font-size:.92rem">s(x) = Σᵣ wᵣ·zᵣ / Σᵣ wᵣ</code>
+  </div>
+
+  <div class="factors" style="margin-top:1.25rem">
+    {% for p in plots %}
+    <div>
+      <h3 style="margin-bottom:.65rem">{{ p.judul }}</h3>
+      <svg viewBox="0 0 370 150" role="img" aria-label="Fungsi keanggotaan {{ p.judul }}" style="width:100%;height:auto">
+        <line x1="10" y1="20" x2="360" y2="20" stroke="rgba(255,255,255,0.06)"/>
+        <line x1="10" y1="70" x2="360" y2="70" stroke="rgba(255,255,255,0.06)"/>
+        <line x1="10" y1="120" x2="360" y2="120" stroke="rgba(255,255,255,0.22)"/>
+        {% for l in p.lines %}<polyline points="{{ l.poly }}" fill="none" stroke="{{ l.color }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>{% endfor %}
+        {% for x, t in p.ticks %}<text x="{{ x }}" y="138" font-size="11" fill="#94A3B8" text-anchor="middle">{{ t }}</text>{% endfor %}
+      </svg>
+      <div class="legend">{% for l in p.lines %}<span style="--c:{{ l.color }}"><b style="color:{{ l.color }}">{{ l.label }}</b></span>{% endfor %}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h3 style="margin-top:1.85rem;margin-bottom:.75rem">Basis aturan dan konsekuen yang dipelajari</h3>
+  <div class="tablewrap">
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Aturan</th>
+          <th>JIKA</th>
+          <th class="num">Risiko aturan (z)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in m.sugeno.rules %}
+        <tr>
+          <td><span class="pill">R{{ loop.index }}</span></td>
+          <td style="color:#E2E8F0">{{ r.aturan }}</td>
+          <td class="num">
+            <div style="font-weight:600;color:#fff">{{ r.z|pct(1) }}</div>
+            <div class="track" style="height:5px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin-top:4px;min-width:72px">
+              <b style="display:block;height:100%;width:{{ (r.z * 100)|round(1) }}%;background:var(--gradasi-utama);border-radius:99px"></b>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted small" style="margin-top:.85rem;margin-bottom:0;max-width:72ch">Indeks Sugeno sendirian mencapai AUC {{ m.sugeno.auc|idn(3) }} pada validasi silang. Skor risiko sistem menggabungkannya dengan probabilitas model dengan bobot {{ (m.sugeno.alpha*100)|round|int }}%; angka lengkapnya ada di halaman Model.</p>
 </section>
 {% endif %}
 {% endblock %}
