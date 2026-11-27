@@ -1,8 +1,24 @@
 {% extends "base.html" %}
 {% block title %}{{ judul }}{% endblock %}
 {% block content %}
-<div class="empty"><h2>{{ judul }}</h2><p>{{ isi }}</p><a class="btn" href="{{ url_for('dashboard') }}">Kembali ke ringkasan</a></div>
+<div class="empty" style="max-width:38rem">
+  <div style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;background:linear-gradient(135deg,rgba(244,63,94,.22),rgba(168,85,247,.2));border:1px solid rgba(244,63,94,.38);box-shadow:0 0 18px rgba(244,63,94,.22);color:#FDA4AF">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  </div>
+  <h2>{{ judul }}</h2>
+  <p class="muted" style="margin:.45rem 0 1.25rem">{{ isi }}</p>
+  <a class="btn" href="{{ url_for('dashboard') }}">Kembali ke ringkasan</a>
+</div>
 {% endblock %}
 {% block bare %}
-<div style="padding:3rem;max-width:36rem"><h1>{{ judul }}</h1><p>{{ isi }}</p><a class="btn" href="{{ url_for('login') }}">Ke halaman masuk</a></div>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem">
+  <div class="seg-block" style="max-width:34rem;width:100%;margin-bottom:0">
+    <div style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;background:linear-gradient(135deg,rgba(244,63,94,.22),rgba(168,85,247,.2));border:1px solid rgba(244,63,94,.38);box-shadow:0 0 18px rgba(244,63,94,.22);color:#FDA4AF">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <h1 style="font-size:1.6rem;margin-bottom:.45rem">{{ judul }}</h1>
+    <p class="muted" style="margin-bottom:1.35rem">{{ isi }}</p>
+    <a class="btn" href="{{ url_for('login') }}">Ke halaman masuk</a>
+  </div>
+</div>
 {% endblock %}

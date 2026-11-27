@@ -3,26 +3,46 @@
 {% block title %}{{ r.customer_id }}{% endblock %}
 {% block content %}
 <div class="page-head">
-  <div><a class="small" href="{{ url_for('customers') }}">Kembali ke daftar pelanggan</a>
-    <h1 style="margin-top:.4rem">{{ r.customer_id }}</h1></div>
-  <div class="row">{{ sig(r.prob, True) }}
-    <div><div style="font-size:1.9rem;font-weight:700;line-height:1">{{ r.prob|pct(1) }}</div><div class="muted small">kemungkinan berhenti</div></div>
-    {{ status(r, thr) }}</div>
+  <div>
+    <a class="small" href="{{ url_for('customers') }}" style="display:inline-flex;align-items:center;gap:.35rem;text-decoration:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Kembali ke daftar pelanggan
+    </a>
+    <h1 style="margin-top:.45rem">{{ r.customer_id }}</h1>
+  </div>
+  <div class="row" style="padding:.75rem 1.15rem;background:var(--kaca);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--garis);border-radius:16px;box-shadow:var(--bayangan-kaca)">
+    {{ sig(r.prob, True) }}
+    <div>
+      <div style="font-size:1.85rem;font-weight:700;line-height:1;color:#fff">{{ r.prob|pct(1) }}</div>
+      <div class="muted small">kemungkinan berhenti</div>
+    </div>
+    {{ status(r, thr) }}
+  </div>
 </div>
 
 <div class="split">
   <div>
-    <section>
-      <h2>Faktor pendorong risiko</h2>
+    <section class="seg-block">
+      <div class="row" style="margin-bottom:.75rem">
+        <span style="width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(244,63,94,.2),rgba(168,85,247,.18));border:1px solid rgba(244,63,94,.35);color:#FDA4AF">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </span>
+        <h2>Faktor pendorong risiko</h2>
+      </div>
       {% if up or down %}
       <p class="muted small">Selisih probabilitas bila faktor itu dibuat sama seperti pelanggan tipikal yang bertahan.</p>
-      {% for d in up %}<div class="driver"><div><b>{{ d.fitur }}</b>: {{ d.nilai }}</div><div class="d">+{{ (d.delta*100)|round(0)|int }} poin</div></div>{% endfor %}
-      {% for d in down %}<div class="driver"><div><b>{{ d.fitur }}</b>: {{ d.nilai }}</div><div class="d turun">{{ (d.delta*100)|round(0)|int }} poin</div></div>{% endfor %}
-      {% else %}<p class="muted">Belum ada penjelasan. Latih model untuk menampilkan faktor pendorong.</p>{% endif %}
+      {% for d in up %}<div class="driver"><div><b style="color:#fff">{{ d.fitur }}</b>: {{ d.nilai }}</div><div class="d">+{{ (d.delta*100)|round(0)|int }} poin</div></div>{% endfor %}
+      {% for d in down %}<div class="driver"><div><b style="color:#fff">{{ d.fitur }}</b>: {{ d.nilai }}</div><div class="d turun">{{ (d.delta*100)|round(0)|int }} poin</div></div>{% endfor %}
+      {% else %}<p class="muted" style="margin-bottom:0">Belum ada penjelasan. Latih model untuk menampilkan faktor pendorong.</p>{% endif %}
     </section>
 
-    <section class="sec">
-      <h2>Penjelasan fuzzy</h2>
+    <section class="seg-block">
+      <div class="row" style="margin-bottom:.75rem">
+        <span style="width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(168,85,247,.18));border:1px solid rgba(34,211,238,.35);color:#67E8F9">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        </span>
+        <h2>Penjelasan fuzzy</h2>
+      </div>
       {% if memb %}
       <h3>Derajat keanggotaan segmen</h3>
       {% for nama, u in memb %}<div class="fbar"><div class="t"><span>{{ nama }}</span></div>
@@ -30,14 +50,19 @@
       {% if (memb|map('last')|max) < 0.5 %}<p class="muted small">Keanggotaan tertinggi di bawah 50%, jadi pelanggan ini berada di perbatasan antarsegmen.</p>{% endif %}
       {% endif %}
       {% if rules %}
-      <h3 style="margin-top:1.1rem">Aturan Sugeno yang paling aktif</h3>
+      <h3 style="margin-top:1.25rem">Aturan Sugeno yang paling aktif</h3>
       <p class="muted small">Indeks fuzzy {{ r.skor_fuzzy|pct(1) }}, probabilitas model {{ r.prob_model|pct(1) }}, skor gabungan {{ r.prob|pct(1) }} (bobot Sugeno {{ (alpha*100)|round|int }}%).</p>
       {% for x in rules %}<div class="driver"><div>{{ x.aturan }}</div><div class="muted small">kekuatan {{ x.bobot|pct(0) }}, risiko aturan {{ x.z|pct(0) }}</div></div>{% endfor %}
       {% endif %}
     </section>
 
-    <section class="sec">
-      <h2>Saran aksi retensi</h2>
+    <section class="seg-block">
+      <div class="row" style="margin-bottom:.75rem">
+        <span style="width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(34,211,238,.18));border:1px solid rgba(52,211,153,.35);color:#6EE7B7">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </span>
+        <h2>Saran aksi retensi</h2>
+      </div>
       {% if not berisiko %}<p class="muted small">Pelanggan ini di bawah ambang risiko. Saran di bawah bersifat pencegahan.</p>{% endif %}
       <h3 style="margin-top:.75rem">Untuk pelanggan ini</h3>
       <ul class="rec">{% for x in recs %}<li>{{ x }}</li>{% endfor %}</ul>
@@ -45,32 +70,38 @@
       <ul class="rec">{% for x in seg_recs %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
     </section>
 
-    <section class="sec" id="tindak-lanjut">
-      <h2>Tindak lanjut</h2>
-      <form method="post" action="{{ url_for('add_followup', cid=r.customer_id) }}" style="display:grid;gap:.75rem;max-width:34rem">
+    <section class="seg-block" id="tindak-lanjut">
+      <div class="row" style="margin-bottom:.85rem">
+        <span style="width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(34,211,238,.18));border:1px solid rgba(168,85,247,.35);color:#D8B4FE">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </span>
+        <h2>Tindak lanjut</h2>
+      </div>
+      <form method="post" action="{{ url_for('add_followup', cid=r.customer_id) }}" style="display:grid;gap:.85rem;max-width:34rem">
         {{ csrf() }}
         <div class="row" style="align-items:flex-end">
           <div style="flex:1;min-width:12rem"><label for="aksi">Aksi</label><select id="aksi" name="aksi">{% for a in aksi %}<option>{{ a }}</option>{% endfor %}</select></div>
           <div style="flex:1;min-width:12rem"><label for="st">Status</label><select id="st" name="status">{% for a in status_tl %}<option>{{ a }}</option>{% endfor %}</select></div>
         </div>
-        <div><label for="cat">Catatan</label><textarea id="cat" name="catatan" maxlength="1000" required></textarea></div>
+        <div><label for="cat">Catatan</label><textarea id="cat" name="catatan" maxlength="1000" placeholder="Tulis hasil komunikasi atau rencana retensi..." required></textarea></div>
         <div><button class="btn" type="submit">Simpan tindak lanjut</button></div>
       </form>
-      {% for x in fu %}<div class="fu"><b>{{ x.aksi }}</b> <span class="pill">{{ x.status }}</span>
-        <div>{{ x.catatan }}</div><div class="muted small">{{ x.nama }}, {{ x.dibuat|tgl }}</div></div>
-      {% else %}<p class="muted" style="margin-top:1rem">Belum ada tindak lanjut untuk pelanggan ini.</p>{% endfor %}
+      {% for x in fu %}<div class="fu"><b style="color:#fff">{{ x.aksi }}</b> <span class="pill">{{ x.status }}</span>
+        <div style="margin:.25rem 0">{{ x.catatan }}</div><div class="muted small">{{ x.nama }}, {{ x.dibuat|tgl }}</div></div>
+      {% else %}<p class="muted" style="margin-top:1rem;margin-bottom:0">Belum ada tindak lanjut untuk pelanggan ini.</p>{% endfor %}
     </section>
   </div>
 
   <aside>
-    {% if seg %}<section>
+    {% if seg %}<section class="seg-block">
       <h2>{{ seg.nama }}</h2>
-      <p class="muted">{{ seg.ringkasan }}</p>
+      <p class="muted" style="margin-top:.45rem">{{ seg.ringkasan }}</p>
       <dl class="kv small"><dt>Anggota</dt><dd>{{ seg.ukuran|idn }} pelanggan</dd><dt>Churn historis</dt><dd>{{ seg.churn_rate|pct(1) }}</dd></dl>
-      <p style="margin-top:.75rem"><a href="{{ url_for('customers', segmen=seg.id, tampil='semua', status='semua') }}">Lihat semua anggota segmen</a></p>
+      <p style="margin-top:1rem;margin-bottom:0"><a class="btn ghost kecil" href="{{ url_for('customers', segmen=seg.id, tampil='semua', status='semua') }}">Lihat semua anggota segmen</a></p>
     </section>{% endif %}
-    <section class="sec">
-      <h2>Data pelanggan</h2>
+
+    <section class="seg-block">
+      <h2 style="margin-bottom:.85rem">Data pelanggan</h2>
       <dl class="kv small">
         <dt>Kontrak</dt><dd>{{ r.contract|vid }}</dd><dt>Internet</dt><dd>{{ 'tanpa internet' if r.internet_service=='No' else r.internet_service|vid }}</dd>
         <dt>Pembayaran</dt><dd>{{ r.payment_method|vid }}</dd><dt>Tagihan tanpa kertas</dt><dd>{{ 'ya' if r.paperless_billing=='Yes' else 'tidak' }}</dd>
@@ -80,10 +111,11 @@
         <dt>Status tercatat</dt><dd>{{ {'Yes':'Sudah berhenti','No':'Masih aktif'}.get(r.churn_aktual,'Belum diketahui') }}</dd>
       </dl>
     </section>
-    <section class="sec">
-      <h2>Riwayat prediksi</h2>
-      {% for h in hist %}<div class="driver"><div>{{ h.waktu|tgl }} <span class="muted small">{{ h.sumber }}</span></div><div><b>{{ h.prob|pct(1) }}</b></div></div>
-      {% else %}<p class="muted">Belum ada riwayat.</p>{% endfor %}
+
+    <section class="seg-block">
+      <h2 style="margin-bottom:.65rem">Riwayat prediksi</h2>
+      {% for h in hist %}<div class="driver"><div>{{ h.waktu|tgl }} <span class="muted small">{{ h.sumber }}</span></div><div><b style="color:#fff">{{ h.prob|pct(1) }}</b></div></div>
+      {% else %}<p class="muted" style="margin-bottom:0">Belum ada riwayat.</p>{% endfor %}
     </section>
   </aside>
 </div>
