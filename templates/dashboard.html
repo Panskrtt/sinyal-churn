@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Ringkasan{% endblock %}
+{% block content %}
+{% if kosong %}
+<div class="empty">
+  {% if user.role == 'retensi' %}
+  <h2>Antrean retensi belum tersedia</h2>
+  <p>Belum ada data pelanggan yang sudah diberi skor. Minta analis data mengunggah data dan melatih model terlebih dahulu.</p>
+  {% elif user.role == 'analis' %}
+  <h2>Siapkan analisis pelanggan</h2>
+  <p>Unggah data pelanggan, lalu latih model agar skor risiko dan analisis segmen tersedia.</p>
+  <a class="btn" href="{{ url_for('upload') }}">Unggah data pelanggan</a>
+  {% else %}
+  <h2>Ringkasan sistem menunggu data</h2>
+  <p>Belum ada data pelanggan yang sudah diberi skor. Kelola akun dari menu Pengguna atau minta analis data menyiapkan data.</p>
+  <a class="btn" href="{{ url_for('users') }}">Kelola pengguna</a>
+  {% endif %}
+</div>
+{% else %}
+<section class="hero">
+  <p class="eyebrow">Pusat kendali retensi</p>
+  <h1><span class="angka">{{ berisiko|idn }}</span> dari {{ aktif|idn }} pelanggan aktif berada di atas ambang risiko {{ (thr*100)|round|int }}%.</h1>
+  <p class="muted">Pelanggan di atas ambang masuk daftar tindak lanjut tim retensi.
+    {% if user.role in ('analis','admin') %}Ambang diatur di halaman <a href="{{ url_for('model') }}">Model</a>.{% endif %}
+    <a href="{{ url_for('customers') }}">Buka daftar pelanggan berisiko</a>.</p>
+  <div class="histo">
+    <svg viewBox="0 0 720 200" role="img" aria-label="Sebaran probabilitas churn pelanggan aktif dengan garis ambang di {{ (thr*100)|round|int }} persen">
+      {% for b in bars %}<rect class="bar{% if b.hot %} hot{% endif %}" x="{{ b.x + 1 }}" y="{{ 160 - b.h }}" width="34" height="{{ b.h }}" rx="2"><title>{{ b.lo }}–{{ b.hi }}%: {{ b.n|idn }} pelanggan</title></rect>{% endfor %}
+      <line class="thr" x1="{{ tx }}" x2="{{ tx }}" y1="0" y2="168"/>
+      <text class="thr-label" x="{{ tx + 6 if tx < 560 else tx - 6 }}" y="12" text-anchor="{{ 'start' if tx < 560 else 'end' }}">Ambang {{ (thr*100)|round|int }}%</text>
+      {% for v, x, a in [(0,0,'start'),(25,180,'middle'),(50,360,'middle'),(75,540,'middle'),(100,720,'end')] %}<text class="tick" x="{{ x }}" y="188" text-anchor="{{ a }}">{{ v }}%</text>{% endfor %}
+    </svg>
+    <div class="legend"><span>Di bawah ambang</span><span class="hot">Di atas ambang</span><span style="margin-left:auto">Tiap batang: jumlah pelanggan aktif per rentang probabilitas 5%</span></div>
+  </div>
+  <dl class="stats">
+    <div><dt>Total pelanggan</dt><dd>{{ total|idn }}</dd></div>
+    <div><dt>Pelanggan aktif</dt><dd>{{ aktif|idn }}</dd></div>
+    <div><dt>Churn pada data berlabel</dt><dd>{{ rate|pct(1) }}</dd></div>
+    <div><dt>Aktif dan berisiko</dt><dd>{{ ((berisiko/aktif) if aktif else 0)|pct(1) }}</dd></div>
+  </dl>
+</section>
+
+{% if user.role == 'retensi' %}
+<section class="sec">
+  <div class="page-head"><div><p class="eyebrow">Ruang kerja tim retensi</p><h2>Antrean prioritas tindak lanjut</h2></div>
+    <a class="btn" href="{{ url_for('customers') }}">Buka seluruh daftar risiko</a></div>
+  {% if role_data.prioritas %}
+  <div class="tablewrap"><table class="data">
+    <thead><tr><th>Prioritas</th><th>ID pelanggan</th><th class="num">Risiko berhenti</th><th></th></tr></thead>
+    <tbody>{% for r in role_data.prioritas %}<tr>
+      <td>{{ loop.index }}</td><td><a href="{{ url_for('customer', cid=r.customer_id) }}">{{ r.customer_id }}</a></td>
+      <td class="num"><b>{{ r.prob|pct(1) }}</b></td><td><a href="{{ url_for('customer', cid=r.customer_id) }}#tindak-lanjut">Catat tindak lanjut</a></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<div class="empty"><h2>Tidak ada pelanggan di atas ambang</h2><p>Periksa kembali daftar pelanggan atau lanjutkan dengan aksi pencegahan.</p></div>{% endif %}
+</section>
+{% elif user.role == 'analis' %}
+<section class="sec">
+  <p class="eyebrow">Ruang kerja analis data</p><h2>Status model dan data</h2>
+  <div class="stats">
+    <div><dt>Pelanggan terskor</dt><dd>{{ scored|idn }}</dd></div>
+    <div><dt>Data berlabel untuk evaluasi</dt><dd>{{ role_data.metrics.n|idn if role_data.metrics else '–' }}</dd></div>
+    <div><dt>Model aktif</dt><dd style="font-size:1.05rem">{{ role_data.metrics.selected if role_data.metrics else 'Belum dilatih' }}</dd></div>
+    <div><dt>Pelatihan terakhir</dt><dd style="font-size:1.05rem">{{ role_data.run.waktu|tgl if role_data.run else 'Belum ada' }}</dd></div>
+  </div>
+  <div class="row" style="margin-top:1rem"><a class="btn" href="{{ url_for('model') }}">Evaluasi dan latih model</a>
+    <a class="btn ghost" href="{{ url_for('upload') }}">Perbarui data</a><a class="btn ghost" href="{{ url_for('fuzzy') }}">Tinjau analisis fuzzy</a></div>
+</section>
+{% elif user.role == 'admin' %}
+<section class="sec">
+  <div class="page-head"><div><p class="eyebrow">Ruang kerja admin sistem</p><h2>Ringkasan akun dan akses</h2></div>
+    <a class="btn" href="{{ url_for('users') }}">Kelola pengguna</a></div>
+  <div class="tablewrap"><table class="data">
+    <thead><tr><th>Peran</th><th class="num">Akun aktif</th><th class="num">Total akun</th></tr></thead>
+    <tbody>{% for a in role_data.accounts %}<tr><td>{{ ROLES[a.role] }}</td><td class="num">{{ a.aktif|idn }}</td><td class="num">{{ a.total|idn }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <p class="muted small" style="margin-top:.75rem">Admin memiliki akses penuh. Perbarui hak akses dan nonaktifkan akun yang tidak lagi digunakan.</p>
+</section>
+{% endif %}
+
+<section class="sec">
+  <h2>Segmen pelanggan</h2>
+  <div class="tablewrap"><table class="data">
+    <thead><tr><th>Segmen</th><th class="num">Pelanggan</th><th class="num">Churn historis</th><th class="num">Aktif dan berisiko</th><th>Ciri utama</th><th></th></tr></thead>
+    <tbody>{% for s in segs %}<tr>
+      <td><b>{{ s.nama }}</b></td><td class="num">{{ s.ukuran|idn }}</td><td class="num">{{ s.churn_rate|pct(1) }}</td>
+      <td class="num">{{ s.berisiko|idn }}</td><td class="small muted" style="min-width:20rem">{{ s.ringkasan }}</td>
+      <td><a href="{{ url_for('customers', segmen=s.id) }}">Lihat pelanggan</a></td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+
+<section class="sec">
+  <h2>Faktor yang berkaitan dengan churn</h2>
+  <p class="muted">Persentase pelanggan berlabel yang berhenti, per kelompok. Batang merah menandai kelompok dengan churn di atas rata-rata keseluruhan.</p>
+  <div class="factors">
+    {% for f in factors %}<div><h3>{{ f.judul }}</h3>
+      {% for r in f.rows %}<div class="fbar"><div class="t"><span>{{ r.g|vid }}</span><span class="muted">{{ r.n|idn }} pelanggan</span></div>
+        <div class="track"><b class="{% if r.r > rate %}tinggi{% endif %}" style="width:{{ (r.r / fmax * 100)|round(1) }}%"></b></div><div class="v">{{ r.r|pct(1) }}</div></div>{% endfor %}
+    </div>{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

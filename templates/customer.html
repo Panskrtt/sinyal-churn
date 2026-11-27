@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_m.html" import sig, status, csrf %}
+{% block title %}{{ r.customer_id }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><a class="small" href="{{ url_for('customers') }}">Kembali ke daftar pelanggan</a>
+    <h1 style="margin-top:.4rem">{{ r.customer_id }}</h1></div>
+  <div class="row">{{ sig(r.prob, True) }}
+    <div><div style="font-size:1.9rem;font-weight:700;line-height:1">{{ r.prob|pct(1) }}</div><div class="muted small">kemungkinan berhenti</div></div>
+    {{ status(r, thr) }}</div>
+</div>
+
+<div class="split">
+  <div>
+    <section>
+      <h2>Faktor pendorong risiko</h2>
+      {% if up or down %}
+      <p class="muted small">Selisih probabilitas bila faktor itu dibuat sama seperti pelanggan tipikal yang bertahan.</p>
+      {% for d in up %}<div class="driver"><div><b>{{ d.fitur }}</b>: {{ d.nilai }}</div><div class="d">+{{ (d.delta*100)|round(0)|int }} poin</div></div>{% endfor %}
+      {% for d in down %}<div class="driver"><div><b>{{ d.fitur }}</b>: {{ d.nilai }}</div><div class="d turun">{{ (d.delta*100)|round(0)|int }} poin</div></div>{% endfor %}
+      {% else %}<p class="muted">Belum ada penjelasan. Latih model untuk menampilkan faktor pendorong.</p>{% endif %}
+    </section>
+
+    <section class="sec">
+      <h2>Penjelasan fuzzy</h2>
+      {% if memb %}
+      <h3>Derajat keanggotaan segmen</h3>
+      {% for nama, u in memb %}<div class="fbar"><div class="t"><span>{{ nama }}</span></div>
+        <div class="track"><b style="width:{{ (u*100)|round(1) }}%"></b></div><div class="v">{{ u|pct(0) }}</div></div>{% endfor %}
+      {% if (memb|map('last')|max) < 0.5 %}<p class="muted small">Keanggotaan tertinggi di bawah 50%, jadi pelanggan ini berada di perbatasan antarsegmen.</p>{% endif %}
+      {% endif %}
+      {% if rules %}
+      <h3 style="margin-top:1.1rem">Aturan Sugeno yang paling aktif</h3>
+      <p class="muted small">Indeks fuzzy {{ r.skor_fuzzy|pct(1) }}, probabilitas model {{ r.prob_model|pct(1) }}, skor gabungan {{ r.prob|pct(1) }} (bobot Sugeno {{ (alpha*100)|round|int }}%).</p>
+      {% for x in rules %}<div class="driver"><div>{{ x.aturan }}</div><div class="muted small">kekuatan {{ x.bobot|pct(0) }}, risiko aturan {{ x.z|pct(0) }}</div></div>{% endfor %}
+      {% endif %}
+    </section>
+
+    <section class="sec">
+      <h2>Saran aksi retensi</h2>
+      {% if not berisiko %}<p class="muted small">Pelanggan ini di bawah ambang risiko. Saran di bawah bersifat pencegahan.</p>{% endif %}
+      <h3 style="margin-top:.75rem">Untuk pelanggan ini</h3>
+      <ul class="rec">{% for x in recs %}<li>{{ x }}</li>{% endfor %}</ul>
+      {% if seg %}<h3 style="margin-top:1.1rem">Untuk {{ seg.nama }}</h3>
+      <ul class="rec">{% for x in seg_recs %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+    </section>
+
+    <section class="sec" id="tindak-lanjut">
+      <h2>Tindak lanjut</h2>
+      <form method="post" action="{{ url_for('add_followup', cid=r.customer_id) }}" style="display:grid;gap:.75rem;max-width:34rem">
+        {{ csrf() }}
+        <div class="row" style="align-items:flex-end">
+          <div style="flex:1;min-width:12rem"><label for="aksi">Aksi</label><select id="aksi" name="aksi">{% for a in aksi %}<option>{{ a }}</option>{% endfor %}</select></div>
+          <div style="flex:1;min-width:12rem"><label for="st">Status</label><select id="st" name="status">{% for a in status_tl %}<option>{{ a }}</option>{% endfor %}</select></div>
+        </div>
+        <div><label for="cat">Catatan</label><textarea id="cat" name="catatan" maxlength="1000" required></textarea></div>
+        <div><button class="btn" type="submit">Simpan tindak lanjut</button></div>
+      </form>
+      {% for x in fu %}<div class="fu"><b>{{ x.aksi }}</b> <span class="pill">{{ x.status }}</span>
+        <div>{{ x.catatan }}</div><div class="muted small">{{ x.nama }}, {{ x.dibuat|tgl }}</div></div>
+      {% else %}<p class="muted" style="margin-top:1rem">Belum ada tindak lanjut untuk pelanggan ini.</p>{% endfor %}
+    </section>
+  </div>
+
+  <aside>
+    {% if seg %}<section>
+      <h2>{{ seg.nama }}</h2>
+      <p class="muted">{{ seg.ringkasan }}</p>
+      <dl class="kv small"><dt>Anggota</dt><dd>{{ seg.ukuran|idn }} pelanggan</dd><dt>Churn historis</dt><dd>{{ seg.churn_rate|pct(1) }}</dd></dl>
+      <p style="margin-top:.75rem"><a href="{{ url_for('customers', segmen=seg.id, tampil='semua', status='semua') }}">Lihat semua anggota segmen</a></p>
+    </section>{% endif %}
+    <section class="sec">
+      <h2>Data pelanggan</h2>
+      <dl class="kv small">
+        <dt>Kontrak</dt><dd>{{ r.contract|vid }}</dd><dt>Internet</dt><dd>{{ 'tanpa internet' if r.internet_service=='No' else r.internet_service|vid }}</dd>
+        <dt>Pembayaran</dt><dd>{{ r.payment_method|vid }}</dd><dt>Tagihan tanpa kertas</dt><dd>{{ 'ya' if r.paperless_billing=='Yes' else 'tidak' }}</dd>
+        <dt>Lama berlangganan</dt><dd>{{ r.tenure|idn }} bulan</dd><dt>Tagihan bulanan</dt><dd>USD {{ r.monthly_charges|idn(2) }}</dd>
+        <dt>Total tagihan</dt><dd>USD {{ r.total_charges|idn(2) }}</dd><dt>Layanan tambahan</dt><dd>{{ r.layanan_tambahan }} dari 6</dd>
+        <dt>Lansia</dt><dd>{{ 'ya' if r.senior_citizen=='Yes' else 'tidak' }}</dd><dt>Pasangan / tanggungan</dt><dd>{{ 'ya' if r.partner=='Yes' else 'tidak' }} / {{ 'ya' if r.dependents=='Yes' else 'tidak' }}</dd>
+        <dt>Status tercatat</dt><dd>{{ {'Yes':'Sudah berhenti','No':'Masih aktif'}.get(r.churn_aktual,'Belum diketahui') }}</dd>
+      </dl>
+    </section>
+    <section class="sec">
+      <h2>Riwayat prediksi</h2>
+      {% for h in hist %}<div class="driver"><div>{{ h.waktu|tgl }} <span class="muted small">{{ h.sumber }}</span></div><div><b>{{ h.prob|pct(1) }}</b></div></div>
+      {% else %}<p class="muted">Belum ada riwayat.</p>{% endfor %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

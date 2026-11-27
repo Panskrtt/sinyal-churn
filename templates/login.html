@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_m.html" import csrf %}
+{% block title %}Masuk{% endblock %}
+{% block bare %}
+<div class="login">
+  <section class="kiri">
+    <span class="sig besar" style="--c:#5FD0D8"><i style="background:#5FD0D8"></i><i style="background:#5FD0D8"></i><i style="background:#5FD0D8"></i><i style="background:#3b6178"></i></span>
+    <h1>Pelanggan yang akan pergi biasanya memberi tanda dulu.</h1>
+    <p>Sinyal menandai pelanggan telekomunikasi yang berisiko berhenti berlangganan, lengkap dengan segmen dan saran aksi untuk tim retensi.</p>
+  </section>
+  <section class="kanan">
+    <form method="post" novalidate>
+      {{ csrf() }}
+      <h2>Masuk ke Sinyal</h2>
+      {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}" role="alert">{{ msg }}</div>{% endfor %}
+      <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required autofocus></div>
+      <div><label for="pw">Kata sandi</label><input id="pw" name="password" type="password" autocomplete="current-password" required></div>
+      <button class="btn" type="submit">Masuk</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

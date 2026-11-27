@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Tindak lanjut{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Riwayat tindak lanjut</h1></div>
+{% if rows %}
+<div class="tablewrap"><table class="data">
+  <thead><tr><th>Waktu</th><th>Pelanggan</th><th>Aksi</th><th>Status</th><th>Catatan</th><th>Dicatat oleh</th></tr></thead>
+  <tbody>{% for x in rows %}<tr><td class="small">{{ x.dibuat|tgl }}</td>
+    <td><a href="{{ url_for('customer', cid=x.customer_id) }}">{{ x.customer_id }}</a></td><td>{{ x.aksi }}</td>
+    <td><span class="pill">{{ x.status }}</span></td><td style="min-width:16rem">{{ x.catatan }}</td><td>{{ x.nama }}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty"><h2>Belum ada tindak lanjut</h2><p>Buka profil pelanggan berisiko lalu catat aksi retensi yang dilakukan.</p>
+<a class="btn" href="{{ url_for('customers') }}">Buka daftar pelanggan</a></div>{% endif %}
+{% endblock %}
