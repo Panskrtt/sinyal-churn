@@ -3,89 +3,96 @@
 {% block content %}
 {% if kosong %}
 <div class="empty">
-  {% if user.role == 'retensi' %}
-  <h2>Antrean retensi belum tersedia</h2>
-  <p>Belum ada data pelanggan yang sudah diberi skor. Minta analis data mengunggah data dan melatih model terlebih dahulu.</p>
-  {% elif user.role == 'analis' %}
-  <h2>Siapkan analisis pelanggan</h2>
-  <p>Unggah data pelanggan, lalu latih model agar skor risiko dan analisis segmen tersedia.</p>
-  <a class="btn" href="{{ url_for('upload') }}">Unggah data pelanggan</a>
-  {% else %}
-  <h2>Ringkasan sistem menunggu data</h2>
-  <p>Belum ada data pelanggan yang sudah diberi skor. Kelola akun dari menu Pengguna atau minta analis data menyiapkan data.</p>
-  <a class="btn" href="{{ url_for('users') }}">Kelola pengguna</a>
-  {% endif %}
+  <div style="width:42px;height:42px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(168,85,247,.18));border:1px solid rgba(34,211,238,.35);box-shadow:0 0 18px rgba(34,211,238,.2);color:#67E8F9">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  </div>
+  <h2>Belum ada data pelanggan yang diskor</h2>
+  {% if user.role in ('analis','admin') %}
+  <p class="muted">Unggah data pelanggan lalu latih model agar ringkasan risiko muncul di sini.</p>
+  <a class="btn" href="{{ url_for('upload') }}" style="margin-top:.5rem">Unggah data pelanggan</a>
+  {% else %}<p class="muted">Minta analis data mengunggah data dan melatih model terlebih dahulu.</p>{% endif %}
 </div>
 {% else %}
 <section class="hero">
-  <p class="eyebrow">Pusat kendali retensi</p>
   <h1><span class="angka">{{ berisiko|idn }}</span> dari {{ aktif|idn }} pelanggan aktif berada di atas ambang risiko {{ (thr*100)|round|int }}%.</h1>
   <p class="muted">Pelanggan di atas ambang masuk daftar tindak lanjut tim retensi.
     {% if user.role in ('analis','admin') %}Ambang diatur di halaman <a href="{{ url_for('model') }}">Model</a>.{% endif %}
     <a href="{{ url_for('customers') }}">Buka daftar pelanggan berisiko</a>.</p>
+
   <div class="histo">
     <svg viewBox="0 0 720 200" role="img" aria-label="Sebaran probabilitas churn pelanggan aktif dengan garis ambang di {{ (thr*100)|round|int }} persen">
-      {% for b in bars %}<rect class="bar{% if b.hot %} hot{% endif %}" x="{{ b.x + 1 }}" y="{{ 160 - b.h }}" width="34" height="{{ b.h }}" rx="2"><title>{{ b.lo }}–{{ b.hi }}%: {{ b.n|idn }} pelanggan</title></rect>{% endfor %}
+      <defs>
+        <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.72"/>
+          <stop offset="100%" stop-color="#6366F1" stop-opacity="0.16"/>
+        </linearGradient>
+        <linearGradient id="barHotGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FB7185" stop-opacity="0.95"/>
+          <stop offset="55%" stop-color="#F43F5E" stop-opacity="0.72"/>
+          <stop offset="100%" stop-color="#A855F7" stop-opacity="0.24"/>
+        </linearGradient>
+      </defs>
+      <line x1="0" x2="720" y1="40" y2="40" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="0" x2="720" y1="80" y2="80" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="0" x2="720" y1="120" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="0" x2="720" y1="160" y2="160" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+      {% for b in bars %}<rect class="bar{% if b.hot %} hot{% endif %}" x="{{ b.x + 1 }}" y="{{ 160 - b.h }}" width="34" height="{{ b.h }}" rx="4"><title>{{ b.lo }}–{{ b.hi }}%: {{ b.n|idn }} pelanggan</title></rect>{% endfor %}
       <line class="thr" x1="{{ tx }}" x2="{{ tx }}" y1="0" y2="168"/>
       <text class="thr-label" x="{{ tx + 6 if tx < 560 else tx - 6 }}" y="12" text-anchor="{{ 'start' if tx < 560 else 'end' }}">Ambang {{ (thr*100)|round|int }}%</text>
       {% for v, x, a in [(0,0,'start'),(25,180,'middle'),(50,360,'middle'),(75,540,'middle'),(100,720,'end')] %}<text class="tick" x="{{ x }}" y="188" text-anchor="{{ a }}">{{ v }}%</text>{% endfor %}
     </svg>
-    <div class="legend"><span>Di bawah ambang</span><span class="hot">Di atas ambang</span><span style="margin-left:auto">Tiap batang: jumlah pelanggan aktif per rentang probabilitas 5%</span></div>
+    <div class="legend"><span style="--c:#38BDF8">Di bawah ambang</span><span class="hot">Di atas ambang</span><span style="margin-left:auto">Tiap batang: jumlah pelanggan aktif per rentang probabilitas 5%</span></div>
   </div>
+
   <dl class="stats">
-    <div><dt>Total pelanggan</dt><dd>{{ total|idn }}</dd></div>
-    <div><dt>Pelanggan aktif</dt><dd>{{ aktif|idn }}</dd></div>
-    <div><dt>Churn pada data berlabel</dt><dd>{{ rate|pct(1) }}</dd></div>
-    <div><dt>Aktif dan berisiko</dt><dd>{{ ((berisiko/aktif) if aktif else 0)|pct(1) }}</dd></div>
+    <div>
+      <span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:.65rem;background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(168,85,247,.16));border:1px solid rgba(34,211,238,.3);color:#67E8F9">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </span>
+      <dt>Total pelanggan</dt>
+      <dd>{{ total|idn }}</dd>
+    </div>
+    <div>
+      <span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:.65rem;background:linear-gradient(135deg,rgba(52,211,153,.16),rgba(34,211,238,.16));border:1px solid rgba(52,211,153,.3);color:#6EE7B7">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </span>
+      <dt>Pelanggan aktif</dt>
+      <dd>{{ aktif|idn }}</dd>
+    </div>
+    <div>
+      <span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:.65rem;background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(99,102,241,.18));border:1px solid rgba(168,85,247,.32);color:#D8B4FE">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </span>
+      <dt>Churn pada data berlabel</dt>
+      <dd>{{ rate|pct(1) }}</dd>
+    </div>
+    <div>
+      <span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:.65rem;background:linear-gradient(135deg,rgba(244,63,94,.2),rgba(168,85,247,.18));border:1px solid rgba(244,63,94,.35);color:#FDA4AF">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </span>
+      <dt>Aktif dan berisiko</dt>
+      <dd>{{ ((berisiko/aktif) if aktif else 0)|pct(1) }}</dd>
+    </div>
   </dl>
 </section>
-
-{% if user.role == 'retensi' %}
-<section class="sec">
-  <div class="page-head"><div><p class="eyebrow">Ruang kerja tim retensi</p><h2>Antrean prioritas tindak lanjut</h2></div>
-    <a class="btn" href="{{ url_for('customers') }}">Buka seluruh daftar risiko</a></div>
-  {% if role_data.prioritas %}
-  <div class="tablewrap"><table class="data">
-    <thead><tr><th>Prioritas</th><th>ID pelanggan</th><th class="num">Risiko berhenti</th><th></th></tr></thead>
-    <tbody>{% for r in role_data.prioritas %}<tr>
-      <td>{{ loop.index }}</td><td><a href="{{ url_for('customer', cid=r.customer_id) }}">{{ r.customer_id }}</a></td>
-      <td class="num"><b>{{ r.prob|pct(1) }}</b></td><td><a href="{{ url_for('customer', cid=r.customer_id) }}#tindak-lanjut">Catat tindak lanjut</a></td>
-    </tr>{% endfor %}</tbody>
-  </table></div>
-  {% else %}<div class="empty"><h2>Tidak ada pelanggan di atas ambang</h2><p>Periksa kembali daftar pelanggan atau lanjutkan dengan aksi pencegahan.</p></div>{% endif %}
-</section>
-{% elif user.role == 'analis' %}
-<section class="sec">
-  <p class="eyebrow">Ruang kerja analis data</p><h2>Status model dan data</h2>
-  <div class="stats">
-    <div><dt>Pelanggan terskor</dt><dd>{{ scored|idn }}</dd></div>
-    <div><dt>Data berlabel untuk evaluasi</dt><dd>{{ role_data.metrics.n|idn if role_data.metrics else '–' }}</dd></div>
-    <div><dt>Model aktif</dt><dd style="font-size:1.05rem">{{ role_data.metrics.selected if role_data.metrics else 'Belum dilatih' }}</dd></div>
-    <div><dt>Pelatihan terakhir</dt><dd style="font-size:1.05rem">{{ role_data.run.waktu|tgl if role_data.run else 'Belum ada' }}</dd></div>
-  </div>
-  <div class="row" style="margin-top:1rem"><a class="btn" href="{{ url_for('model') }}">Evaluasi dan latih model</a>
-    <a class="btn ghost" href="{{ url_for('upload') }}">Perbarui data</a><a class="btn ghost" href="{{ url_for('fuzzy') }}">Tinjau analisis fuzzy</a></div>
-</section>
-{% elif user.role == 'admin' %}
-<section class="sec">
-  <div class="page-head"><div><p class="eyebrow">Ruang kerja admin sistem</p><h2>Ringkasan akun dan akses</h2></div>
-    <a class="btn" href="{{ url_for('users') }}">Kelola pengguna</a></div>
-  <div class="tablewrap"><table class="data">
-    <thead><tr><th>Peran</th><th class="num">Akun aktif</th><th class="num">Total akun</th></tr></thead>
-    <tbody>{% for a in role_data.accounts %}<tr><td>{{ ROLES[a.role] }}</td><td class="num">{{ a.aktif|idn }}</td><td class="num">{{ a.total|idn }}</td></tr>{% endfor %}</tbody>
-  </table></div>
-  <p class="muted small" style="margin-top:.75rem">Admin memiliki akses penuh. Perbarui hak akses dan nonaktifkan akun yang tidak lagi digunakan.</p>
-</section>
-{% endif %}
 
 <section class="sec">
   <h2>Segmen pelanggan</h2>
   <div class="tablewrap"><table class="data">
     <thead><tr><th>Segmen</th><th class="num">Pelanggan</th><th class="num">Churn historis</th><th class="num">Aktif dan berisiko</th><th>Ciri utama</th><th></th></tr></thead>
     <tbody>{% for s in segs %}<tr>
-      <td><b>{{ s.nama }}</b></td><td class="num">{{ s.ukuran|idn }}</td><td class="num">{{ s.churn_rate|pct(1) }}</td>
-      <td class="num">{{ s.berisiko|idn }}</td><td class="small muted" style="min-width:20rem">{{ s.ringkasan }}</td>
-      <td><a href="{{ url_for('customers', segmen=s.id) }}">Lihat pelanggan</a></td></tr>{% endfor %}</tbody>
+      <td><b>{{ s.nama }}</b></td>
+      <td class="num">{{ s.ukuran|idn }}</td>
+      <td class="num">
+        <div>{{ s.churn_rate|pct(1) }}</div>
+        <div class="track" style="height:6px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin-top:4px;min-width:72px">
+          <b style="display:block;height:100%;width:{{ (s.churn_rate * 100)|round(1) }}%;background:var(--gradasi-utama);border-radius:99px"></b>
+        </div>
+      </td>
+      <td class="num">{{ s.berisiko|idn }}</td>
+      <td class="small muted" style="min-width:20rem">{{ s.ringkasan }}</td>
+      <td><a class="btn ghost kecil" href="{{ url_for('customers', segmen=s.id) }}">Lihat pelanggan</a></td>
+    </tr>{% endfor %}</tbody>
   </table></div>
 </section>
 

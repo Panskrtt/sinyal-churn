@@ -1,19 +1,63 @@
 {% extends "base.html" %}
 {% block title %}Segmen{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Segmen pelanggan</h1></div>
-<p class="muted" style="max-width:64ch">Segmen dibentuk dengan Fuzzy C-Means dari lama berlangganan, tagihan, jumlah layanan tambahan, kontrak, layanan internet, metode pembayaran, dan data demografi, tanpa memakai label churn. Setiap pelanggan punya derajat keanggotaan di semua segmen; segmen dominan adalah yang derajatnya terbesar. Churn historis dihitung sesudahnya untuk menguji apakah segmen itu bermakna. Penjelasan metode ada di halaman <a href="{{ url_for('fuzzy') }}">Logika fuzzy</a>.</p>
-{% if not segs %}<div class="empty"><h2>Segmen belum terbentuk</h2><p>Latih model terlebih dahulu agar segmen muncul.</p></div>{% endif %}
+<div class="page-head">
+  <div>
+    <h1>Segmen pelanggan</h1>
+    <p class="muted" style="max-width:66ch;margin:.4rem 0 0">Segmen dibentuk dengan Fuzzy C-Means dari lama berlangganan, tagihan, jumlah layanan tambahan, kontrak, layanan internet, metode pembayaran, dan data demografi, tanpa memakai label churn. Setiap pelanggan punya derajat keanggotaan di semua segmen; segmen dominan adalah yang derajatnya terbesar. Churn historis dihitung sesudahnya untuk menguji apakah segmen itu bermakna. Penjelasan metode ada di halaman <a href="{{ url_for('fuzzy') }}">Logika fuzzy</a>.</p>
+  </div>
+</div>
+
+{% if not segs %}
+<div class="empty">
+  <div style="width:42px;height:42px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(168,85,247,.18));border:1px solid rgba(34,211,238,.35);box-shadow:0 0 18px rgba(34,211,238,.2);color:#67E8F9">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+  </div>
+  <h2>Segmen belum terbentuk</h2>
+  <p class="muted" style="margin-bottom:0">Latih model terlebih dahulu agar segmen muncul.</p>
+</div>
+{% endif %}
+
 {% for s in segs %}
 <section class="seg-block">
-  <div class="row" style="justify-content:space-between"><h2>{{ s.nama }}</h2><a class="btn ghost kecil" href="{{ url_for('customers', segmen=s.id) }}">Lihat pelanggan berisiko</a></div>
-  <dl class="stats" style="margin-top:1rem">
-    <div><dt>Anggota</dt><dd>{{ s.ukuran|idn }}</dd></div><div><dt>Churn historis</dt><dd>{{ s.churn_rate|pct(1) }}</dd></div>
-    <div><dt>Aktif dan berisiko</dt><dd>{{ s.berisiko|idn }}</dd></div><div><dt>Rata-rata lama berlangganan</dt><dd>{{ s.tenure|idn }} bln</dd></div>
-    <div><dt>Rata-rata tagihan</dt><dd>USD {{ s.tagihan|idn }}</dd></div>
+  <div class="row" style="justify-content:space-between">
+    <div class="row">
+      <span style="width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(168,85,247,.22),rgba(34,211,238,.2));border:1px solid rgba(168,85,247,.38);box-shadow:0 0 16px rgba(168,85,247,.22);color:#D8B4FE">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </span>
+      <h2>{{ s.nama }}</h2>
+    </div>
+    <a class="btn ghost kecil" href="{{ url_for('customers', segmen=s.id) }}">Lihat pelanggan berisiko</a>
+  </div>
+
+  <dl class="stats" style="margin-top:1.15rem">
+    <div>
+      <dt>Anggota</dt>
+      <dd>{{ s.ukuran|idn }}</dd>
+    </div>
+    <div>
+      <dt>Churn historis</dt>
+      <dd>{{ s.churn_rate|pct(1) }}</dd>
+      <div class="track" style="height:6px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin-top:.55rem">
+        <b style="display:block;height:100%;width:{{ (s.churn_rate * 100)|round(1) }}%;background:var(--gradasi-utama);border-radius:99px;box-shadow:0 0 10px rgba(34,211,238,.45)"></b>
+      </div>
+    </div>
+    <div>
+      <dt>Aktif dan berisiko</dt>
+      <dd>{{ s.berisiko|idn }}</dd>
+    </div>
+    <div>
+      <dt>Rata-rata lama berlangganan</dt>
+      <dd>{{ s.tenure|idn }} bln</dd>
+    </div>
+    <div>
+      <dt>Rata-rata tagihan</dt>
+      <dd>USD {{ s.tagihan|idn }}</dd>
+    </div>
   </dl>
-  <p style="margin-top:1rem;max-width:70ch">{{ s.ringkasan }}</p>
-  <h3>Saran aksi untuk segmen ini</h3>
+
+  <p style="margin-top:1.2rem;max-width:72ch;color:#E2E8F0">{{ s.ringkasan }}</p>
+  <h3 style="margin-top:1rem;color:#67E8F9">Saran aksi untuk segmen ini</h3>
   <ul class="rec">{% for x in s.rec %}<li>{{ x }}</li>{% endfor %}</ul>
 </section>
 {% endfor %}

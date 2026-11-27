@@ -2,30 +2,125 @@
 {% from "_m.html" import csrf %}
 {% block title %}Pengguna{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Pengguna dan hak akses</h1></div>
-<div class="tablewrap"><table class="data">
-  <thead><tr><th>Nama</th><th>Email</th><th>Peran</th><th>Akun</th><th>Kata sandi baru</th><th></th></tr></thead>
-  <tbody>{% for u in rows %}<tr>
-    <td>{{ u.nama }}</td><td>{{ u.email }}</td>
-    <td><select name="role" form="uf{{ u.id }}" aria-label="Peran {{ u.email }}">{% for k, v in ROLES.items() %}<option value="{{ k }}" {% if u.role==k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></td>
-    <td><select name="aktif" form="uf{{ u.id }}" aria-label="Status akun {{ u.email }}"><option value="1" {% if u.aktif %}selected{% endif %}>Aktif</option><option value="0" {% if not u.aktif %}selected{% endif %}>Nonaktif</option></select></td>
-    <td><input type="password" name="password" form="uf{{ u.id }}" autocomplete="new-password" placeholder="Kosongkan bila tidak diganti" aria-label="Kata sandi baru {{ u.email }}"></td>
-    <td><form id="uf{{ u.id }}" method="post" action="{{ url_for('update_user', uid=u.id) }}">{{ csrf() }}<button class="btn kecil" type="submit">Simpan perubahan</button></form></td></tr>{% endfor %}</tbody>
-</table></div>
+<div class="page-head">
+  <div>
+    <h1>Pengguna dan hak akses</h1>
+    <p class="muted small" style="margin:.3rem 0 0">Kelola akun tim, pengaturan peran, status aktif, dan kata sandi pengguna sistem.</p>
+  </div>
+</div>
+
+<div class="tablewrap">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Email</th>
+        <th>Peran</th>
+        <th>Akun</th>
+        <th>Kata sandi baru</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in rows %}
+      <tr>
+        <td style="font-weight:600;color:#fff;white-space:nowrap">{{ u.nama }}</td>
+        <td class="small muted">{{ u.email }}</td>
+        <td style="min-width:11rem">
+          <select name="role" form="uf{{ u.id }}" aria-label="Peran {{ u.email }}">
+            {% for k, v in ROLES.items() %}<option value="{{ k }}" {% if u.role==k %}selected{% endif %}>{{ v }}</option>{% endfor %}
+          </select>
+        </td>
+        <td style="min-width:8.5rem">
+          <select name="aktif" form="uf{{ u.id }}" aria-label="Status akun {{ u.email }}">
+            <option value="1" {% if u.aktif %}selected{% endif %}>Aktif</option>
+            <option value="0" {% if not u.aktif %}selected{% endif %}>Nonaktif</option>
+          </select>
+        </td>
+        <td style="min-width:14rem">
+          <input type="password" name="password" form="uf{{ u.id }}" autocomplete="new-password" placeholder="Kosongkan bila tidak diganti" aria-label="Kata sandi baru {{ u.email }}">
+        </td>
+        <td style="white-space:nowrap">
+          <form id="uf{{ u.id }}" method="post" action="{{ url_for('update_user', uid=u.id) }}">
+            {{ csrf() }}
+            <button class="btn kecil" type="submit">Simpan perubahan</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 <section class="sec">
-  <h2>Tambah pengguna</h2>
-  <form method="post" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:end;max-width:60rem">
-    {{ csrf() }}
-    <div><label for="n">Nama</label><input id="n" name="nama" type="text" required></div>
-    <div><label for="e">Email</label><input id="e" name="email" type="email" required></div>
-    <div><label for="p">Kata sandi (minimal 8 karakter)</label><input id="p" name="password" type="password" autocomplete="new-password" required></div>
-    <div><label for="r">Peran</label><select id="r" name="role">{% for k, v in ROLES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></div>
-    <div><button class="btn" type="submit">Tambah pengguna</button></div>
-  </form>
+  <div class="seg-block" style="margin-bottom:0">
+    <div class="row" style="margin-bottom:1.1rem">
+      <span style="width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(34,211,238,.2),rgba(168,85,247,.2));border:1px solid rgba(34,211,238,.38);box-shadow:0 0 16px rgba(34,211,238,.2);color:#67E8F9">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      </span>
+      <h2>Tambah pengguna</h2>
+    </div>
+
+    <form method="post" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:end">
+      {{ csrf() }}
+      <div>
+        <label for="n">Nama</label>
+        <input id="n" name="nama" type="text" placeholder="Nama lengkap" required>
+      </div>
+      <div>
+        <label for="e">Email</label>
+        <input id="e" name="email" type="email" placeholder="nama@sinyal.id" required>
+      </div>
+      <div>
+        <label for="p">Kata sandi (minimal 8 karakter)</label>
+        <input id="p" name="password" type="password" placeholder="Minimal 8 karakter" autocomplete="new-password" required>
+      </div>
+      <div>
+        <label for="r">Peran</label>
+        <select id="r" name="role">
+          {% for k, v in ROLES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <button class="btn" type="submit" style="width:100%">Tambah pengguna</button>
+      </div>
+    </form>
+  </div>
 </section>
-<section class="sec"><h2>Hak akses per peran</h2>
-  <div class="tablewrap"><table class="data"><thead><tr><th>Fitur</th><th>Tim retensi</th><th>Analis data</th><th>Admin sistem</th></tr></thead><tbody>
-    <tr><td>Ringkasan, daftar pelanggan, segmen, tindak lanjut, ekspor</td><td>Ya</td><td>Ya</td><td>Ya</td></tr>
-    <tr><td>Unggah data, latih ulang model, atur ambang</td><td>Tidak</td><td>Ya</td><td>Ya</td></tr>
-    <tr><td>Kelola pengguna</td><td>Tidak</td><td>Tidak</td><td>Ya</td></tr></tbody></table></div></section>
+
+<section class="sec">
+  <h2>Hak akses per peran</h2>
+  <div class="tablewrap">
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Fitur</th>
+          <th>Tim retensi</th>
+          <th>Analis data</th>
+          <th>Admin sistem</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:#E2E8F0">Ringkasan, daftar pelanggan, segmen, tindak lanjut, ekspor</td>
+          <td><span class="pill ok">Ya</span></td>
+          <td><span class="pill ok">Ya</span></td>
+          <td><span class="pill ok">Ya</span></td>
+        </tr>
+        <tr>
+          <td style="color:#E2E8F0">Unggah data, latih ulang model, atur ambang</td>
+          <td><span class="pill" style="opacity:.6">Tidak</span></td>
+          <td><span class="pill ok">Ya</span></td>
+          <td><span class="pill ok">Ya</span></td>
+        </tr>
+        <tr>
+          <td style="color:#E2E8F0">Kelola pengguna</td>
+          <td><span class="pill" style="opacity:.6">Tidak</span></td>
+          <td><span class="pill" style="opacity:.6">Tidak</span></td>
+          <td><span class="pill ok">Ya</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}

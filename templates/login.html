@@ -4,17 +4,40 @@
 {% block bare %}
 <div class="login">
   <section class="kiri">
-    <span class="sig besar" style="--c:#5FD0D8"><i style="background:#5FD0D8"></i><i style="background:#5FD0D8"></i><i style="background:#5FD0D8"></i><i style="background:#3b6178"></i></span>
+    <span class="sig besar" aria-hidden="true">
+      <i style="background:#22D3EE;box-shadow:0 0 12px rgba(34,211,238,.6)"></i>
+      <i style="background:#22D3EE;box-shadow:0 0 12px rgba(34,211,238,.6)"></i>
+      <i style="background:#22D3EE;box-shadow:0 0 12px rgba(34,211,238,.6)"></i>
+      <i style="background:rgba(168,85,247,.45)"></i>
+    </span>
     <h1>Pelanggan yang akan pergi biasanya memberi tanda dulu.</h1>
     <p>Sinyal menandai pelanggan telekomunikasi yang berisiko berhenti berlangganan, lengkap dengan segmen dan saran aksi untuk tim retensi.</p>
   </section>
   <section class="kanan">
     <form method="post" novalidate>
       {{ csrf() }}
-      <h2>Masuk ke Sinyal</h2>
-      {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}" role="alert">{{ msg }}</div>{% endfor %}
-      <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required autofocus></div>
-      <div><label for="pw">Kata sandi</label><input id="pw" name="password" type="password" autocomplete="current-password" required></div>
+      <div>
+        <h2>Masuk ke Sinyal</h2>
+        <p class="muted small" style="margin:.35rem 0 0">Gunakan akun tim Anda untuk mengakses dashboard retensi.</p>
+      </div>
+      {% for cat, msg in get_flashed_messages(with_categories=true) %}
+      <div class="flash {{ cat }}" role="alert">
+        {% if cat == 'ok' %}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        {% else %}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {% endif %}
+        <span>{{ msg }}</span>
+      </div>
+      {% endfor %}
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="admin@sinyal.id" autocomplete="username" required autofocus>
+      </div>
+      <div>
+        <label for="pw">Kata sandi</label>
+        <input id="pw" name="password" type="password" placeholder="Masukkan kata sandi" autocomplete="current-password" required>
+      </div>
       <button class="btn" type="submit">Masuk</button>
     </form>
   </section>
