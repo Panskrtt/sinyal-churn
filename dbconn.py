@@ -135,7 +135,7 @@ class SQLiteConn(sqlite3.Connection):
 def _friendly(p, e):
     return RuntimeError(
         f"Tidak dapat terhubung ke MySQL di {p['host']}:{p['port']} sebagai '{p['user']}': {e}. "
-        "Pastikan MySQL di XAMPP sudah di-Start (atau container db berjalan) dan DATABASE_URL benar.")
+        "Pastikan server MySQL aktif dan DATABASE_URL benar.")
 
 
 def _pymysql():

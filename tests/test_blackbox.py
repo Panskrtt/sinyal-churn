@@ -18,6 +18,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ["SINYAL_AUTOCREATE"] = "0"
+os.environ["APP_ENV"] = "test"
 TEST_URL = os.environ.get("TEST_DATABASE_URL", "")
 os.environ["DATABASE_URL"] = TEST_URL  # jangan sampai tes menyentuh database di .env
 from app import create_app  # noqa: E402

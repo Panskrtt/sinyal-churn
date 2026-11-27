@@ -206,7 +206,8 @@ def seed_users(conn):
     users = [("Admin Sistem", "admin@sinyal.id", "INITIAL_ADMIN_PASSWORD", "admin"),
              ("Analis Data", "analis@sinyal.id", "INITIAL_ANALYST_PASSWORD", "analis"),
              ("Tim Retensi", "retensi@sinyal.id", "INITIAL_RETENTION_PASSWORD", "retensi")]
-    if os.environ.get("APP_ENV", "").lower() == "production":
+    environment = os.environ.get("APP_ENV", "").lower()
+    if environment == "production":
         missing = [key for _, _, key, _ in users if not os.environ.get(key)]
         if missing:
             raise RuntimeError("Variabel kata sandi awal wajib diatur untuk produksi: " + ", ".join(missing))
@@ -214,9 +215,11 @@ def seed_users(conn):
         if weak:
             raise RuntimeError("Kata sandi awal produksi harus minimal 12 karakter.")
         users = [(nama, email, os.environ[key], role) for nama, email, key, role in users]
-    else:
+    elif environment in ("development", "test"):
         defaults = {"admin": "admin123", "analis": "analis123", "retensi": "retensi123"}
         users = [(nama, email, defaults[role], role) for nama, email, _, role in users]
+    else:
+        raise RuntimeError("APP_ENV harus disetel ke development, test, atau production sebelum membuat akun awal.")
 
     for nama, email, pw, role in users:
         conn.execute("INSERT INTO users(nama,email,password_hash,role,dibuat) VALUES(?,?,?,?,?)",

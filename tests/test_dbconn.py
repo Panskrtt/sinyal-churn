@@ -98,6 +98,17 @@ class DbLayerTests(unittest.TestCase):
             self.assertTrue(check_password_hash(user["password_hash"], passwords["INITIAL_ADMIN_PASSWORD"]))
             c.close()
 
+    def test_seed_menolak_environment_tidak_dikenal(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            c = dbconn.connect("sqlite:///" + os.path.join(d, "x.db"))
+            service.init_schema(c)
+            with patch.dict(os.environ, {}, clear=False):
+                os.environ.pop("APP_ENV", None)
+                with self.assertRaisesRegex(RuntimeError, "APP_ENV harus disetel"):
+                    service.seed_users(c)
+            c.close()
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

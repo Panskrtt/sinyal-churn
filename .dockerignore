@@ -1,6 +1,0 @@
-.git
-.venv
-instance
-__pycache__
-*.pyc
-.env

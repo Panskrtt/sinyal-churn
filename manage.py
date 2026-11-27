@@ -1,7 +1,7 @@
 """Perintah pengelolaan.
 
     python manage.py init     buat tabel, muat dataset contoh, latih model (aman dijalankan ulang)
-    python manage.py ensure   jalankan init hanya bila database/model belum siap (dipakai entrypoint container)
+    python manage.py ensure   siapkan database/model bila belum siap
 
 Database dipilih lewat DATABASE_URL di .env atau variabel lingkungan; bila kosong dipakai SQLite
 di folder instance/.
